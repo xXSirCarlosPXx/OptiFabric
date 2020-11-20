@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,6 +19,7 @@ import net.minecraft.util.math.Direction;
 
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 
+@Pseudo
 @Mixin(targets = "appeng/client/render/tesr/ChestTileEntityRenderer$FaceRotatingModel", remap = false)
 abstract class FaceRotatingModelMixin extends ForwardingBakedModel {
 	@Unique
