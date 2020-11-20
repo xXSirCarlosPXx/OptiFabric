@@ -162,6 +162,10 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("voxelmap")) {
 			Mixins.addConfiguration("optifabric.compat.voxelmap.mixins.json");
 		}
+
+		if (isPresent("appliedenergistics2")) {
+			Mixins.addConfiguration("optifabric.compat.ae2.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {
