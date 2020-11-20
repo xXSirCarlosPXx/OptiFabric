@@ -25,12 +25,16 @@ abstract class FaceRotatingModelMixin extends ForwardingBakedModel {
 	@Unique
 	private BakedQuad activeQuad;
 
-	@Inject(method = "getQuads", at = @At(value = "NEW", target = "net/minecraft/client/render/model/BakedQuad"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, remap = true)
+	@Inject(method = "getQuads(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;Ljava/util/Random;)Ljava/util/List;",
+			at = @At(value = "NEW", target = "net/minecraft/client/render/model/BakedQuad"), locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+			remap = true)
 	private void grabQuad(BlockState state, Direction side, Random rand, CallbackInfoReturnable<List<BakedQuad>> call, List<BakedQuad> quads, int i, BakedQuad quad) {
 		activeQuad = quad;
 	}
 
-	@ModifyArg(method = "getQuads", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/model/BakedQuad;<init>([IILnet/minecraft/util/math/Direction;Lnet/minecraft/client/texture/Sprite;Z)V"), remap = true)
+	@ModifyArg(method = "getQuads(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;Ljava/util/Random;)Ljava/util/List;",
+				at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/model/BakedQuad;<init>([IILnet/minecraft/util/math/Direction;Lnet/minecraft/client/texture/Sprite;Z)V"),
+				remap = true)
 	private Sprite notSoNull(Sprite actuallyNull) {
 		try {
 			return actuallyNull != null ? actuallyNull : ((BakedQuadAccess) activeQuad).getSprite();
