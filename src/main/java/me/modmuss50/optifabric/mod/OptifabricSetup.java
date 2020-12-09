@@ -49,6 +49,10 @@ public class OptifabricSetup implements Runnable {
 			throw new RuntimeException("Failed to setup optifine", e);
 		}
 
+		if (isPresent("fabric-renderer-api-v1")) {
+			Mixins.addConfiguration("optifabric.compat.fabric-renderer-api.mixins.json");
+		}
+
 		if (isPresent("fabric-renderer-indigo")) {
 			Mixins.addConfiguration("optifabric.compat.indigo.mixins.json");
 		}
