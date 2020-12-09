@@ -74,26 +74,26 @@ dependencies {
 		exclude(group: "net.fabricmc")
 		exclude(group: "net.fabricmc.fabric-api")
 	}
-	modRuntime "curse.maven:trumpet-skeleton-fabric:3033242"
+	modRuntime 'curse.maven:trumpet-skeleton-fabric-330417:3033242'
 	modRuntime ("vazkii.patchouli:Patchouli:1.16-40-FABRIC") {
 		exclude(group: "net.fabricmc")
 		exclude(group: "net.fabricmc.fabric-api")
 	}
-	modRuntime "curse.maven:malilib:3030379"
-	modRuntime "curse.maven:watson:3054484"
+	modRuntime 'curse.maven:malilib-303119:3113699'
+	modRuntime 'curse.maven:watson-361509:3130935'
 	modRuntime 'net.earthcomputer:multiconnect:1.3.19:api'
 	modRuntime 'net.earthcomputer:multiconnect:1.3.19:slim'
-	modRuntime 'curse.maven:now-playing:3041887'
+	modRuntime 'curse.maven:now-playing-398652:3041887'
 	modRuntime ('com.github.apace100:origins-fabric:0.4.1') {
 		exclude(group: "net.fabricmc")
 		exclude(group: "net.fabricmc.fabric-api")
 	}
-	modRuntime 'curse.maven:staff-of-building:3033652'
+	modRuntime 'curse.maven:staff-of-building-382694:3060240'
 	modRuntime ('me.shedaniel.cloth.api:cloth-dynamic-registry-api-v1:1.2.1') {
 		exclude(group: "net.fabricmc")
 		exclude(group: "net.fabricmc.fabric-api")
 	}
-	modRuntime 'curse.maven:sandwichable:3039866'
+	modRuntime 'curse.maven:sandwichable-374143:3039866'
 	modRuntime ('appeng:appliedenergistics2-fabric:8.1.0-alpha.9') {
 		exclude(group: "net.fabricmc")
 		exclude(group: "net.fabricmc.fabric-api")
@@ -121,7 +121,7 @@ dependencies {
 		exclude(group: "net.fabricmc")
 		exclude(group: "net.fabricmc.fabric-api")
 	}
-	modRuntime 'curse.maven:chat-heads:3057632'
+	modRuntime 'curse.maven:chat-heads-407206:3114278'
 }
 
 compileJava {
