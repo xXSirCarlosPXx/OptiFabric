@@ -166,6 +166,12 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("appliedenergistics2")) {
 			Mixins.addConfiguration("optifabric.compat.ae2.mixins.json");
 		}
+
+		if (isPresent("images", "=0.3.0")) {
+			Mixins.addConfiguration("optifabric.compat.images-old.mixins.json");
+		} else if (isPresent("images", ">=0.3.1")) {
+			Mixins.addConfiguration("optifabric.compat.images.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {

@@ -122,6 +122,8 @@ dependencies {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 	modRuntime 'curse.maven:chat-heads-407206:3114278'
+	modRuntime 'curse.maven:trinkets-fabric-341284:3100959'
+	modRuntime 'curse.maven:images-400123:3118882'
 }
 
 compileJava {
