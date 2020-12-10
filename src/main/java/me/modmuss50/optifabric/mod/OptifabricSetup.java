@@ -176,6 +176,12 @@ public class OptifabricSetup implements Runnable {
 		} else if (isPresent("images", ">=0.3.1")) {
 			Mixins.addConfiguration("optifabric.compat.images.mixins.json");
 		}
+
+		if (isPresent("architectury", ">=1.0.20")) {
+			Mixins.addConfiguration("optifabric.compat.architectury-B.mixins.json");
+		} else if (isPresent("architectury", ">=1.0.4")) {
+			Mixins.addConfiguration("optifabric.compat.architectury-A.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {
