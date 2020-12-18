@@ -193,6 +193,17 @@ public class OptifineSetup {
 
 	//Gets the offical minecraft jar
 	private static Path getMinecraftJar() throws FileNotFoundException {
+		String givenJar = System.getProperty("optifabric.mc-jar");
+		if (givenJar != null) {
+			File givenJarFile = new File(givenJar);
+
+			if (givenJarFile.exists()) {
+				return givenJarFile.toPath();
+			} else {
+				System.err.println("Supplied Minecraft jar at " + givenJar + " doesn't exist, falling back");
+			}
+		}
+
 		List<Path> contextJars = ((net.fabricmc.loader.FabricLoader) FabricLoader.getInstance()).getGameProvider().getGameContextJars();
 
 		if (contextJars.isEmpty()) throw new IllegalStateException("Start has no context?");
