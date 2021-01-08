@@ -10,6 +10,7 @@ import com.google.common.base.MoreObjects;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import org.spongepowered.asm.mixin.Mixins;
@@ -86,6 +87,18 @@ public class OptifabricSetup implements Runnable {
 
 		if (isPresent("fabric-renderer-indigo")) {
 			Mixins.addConfiguration("optifabric.compat.indigo.mixins.json");
+
+			injector.predictFuture(RemappingUtils.getClassName("class_846$class_849")).ifPresent(node -> {//ChunkBuilder$ChunkData
+				String nonEmptyLayers = RemappingUtils.mapFieldName("class_846$class_849", "field_4450", "Ljava/util/Set;");
+
+				for (FieldNode field : node.fields) {
+					if (nonEmptyLayers.equals(field.name) && "Ljava/util/Set;".equals(field.desc)) {
+						return;
+					}
+				}
+
+				Mixins.addConfiguration("optifabric.compat.indigo.extra-mixins.json");
+			});
 		}
 
 		if (isPresent("fabric-item-api-v1", ">=1.1.0")) {
