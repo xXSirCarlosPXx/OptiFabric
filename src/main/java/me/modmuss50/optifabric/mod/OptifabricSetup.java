@@ -85,6 +85,10 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.fabric-rendering.mixins.json");
 		}
 
+		if (isPresent("fabric-rendering-data-attachment-v1")) {
+			Mixins.addConfiguration("optifabric.compat.fabric-rendering-data.mixins.json");
+		}
+
 		if (isPresent("fabric-renderer-indigo")) {
 			Mixins.addConfiguration("optifabric.compat.indigo.mixins.json");
 
@@ -216,6 +220,12 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.architectury-B.mixins.json");
 		} else if (isPresent("architectury", ">=1.0.4")) {
 			Mixins.addConfiguration("optifabric.compat.architectury-A.mixins.json");
+		}
+
+		if (isPresent("frex", ">=4.3")) {
+			Mixins.addConfiguration("optifabric.compat.frex.mixins.json");
+		} else if (isPresent("frex", "=4.2")) {
+			Mixins.addConfiguration("optifabric.compat.frex-old.mixins.json");
 		}
 	}
 

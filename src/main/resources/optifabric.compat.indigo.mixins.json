@@ -5,6 +5,7 @@
 	"mixins": [
 		"RebuildTaskMixin",
 		"ChunkCacheOFMixin",
-		"BlockModelRendererMixin"
+		"BlockModelRendererMixin",
+		"BridgedChunkRendererRegionMixin"
 	]
 }

@@ -136,6 +136,7 @@ compileJava {
 		method 'net/minecraft/client/render/block/BlockModelRenderer', '(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/client/render/model/BakedModel;' + 
 		'Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;Z' + 
 		'Ljava/util/Random;JILnet/minecraftforge/client/model/data/IModelData;)Z', 'renderModel', 'renderModel'
+		method 'net/optifine/BlockPosM', '(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Ljava/lang/Iterable;', 'getAllInBoxMutable', 'getAllInBoxMutable'
 	}
 }
 
