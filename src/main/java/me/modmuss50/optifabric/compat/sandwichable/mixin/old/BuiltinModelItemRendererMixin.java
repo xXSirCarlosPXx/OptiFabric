@@ -1,4 +1,4 @@
-package me.modmuss50.optifabric.compat.sandwichable.mixin;
+package me.modmuss50.optifabric.compat.sandwichable.mixin.old;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,11 +18,11 @@ import me.modmuss50.optifabric.compat.Shim;
 @InterceptingMixin("io/github/foundationgames/sandwichable/mixin/BuiltinModelItemRendererMixin")
 abstract class BuiltinModelItemRendererMixin {
 	@Shim
-	private native void renderSandwichGui(ItemStack stack, Mode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, CallbackInfo call);
+	private native void sandwich_render(ItemStack stack, Mode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, CallbackInfo call);
 
 	@Inject(method = "renderRaw", remap = false,
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/item/BlockItem;getBlock()Lnet/minecraft/block/Block;", shift = At.Shift.AFTER, remap = true))
 	private void sandwich_render(ItemStack stack, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, CallbackInfo call) {
-		renderSandwichGui(stack, Mode.GROUND, matrices, vertexConsumers, light, overlay, call);
+		sandwich_render(stack, Mode.GROUND, matrices, vertexConsumers, light, overlay, call);
 	}
 }
