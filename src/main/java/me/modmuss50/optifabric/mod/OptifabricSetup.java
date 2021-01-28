@@ -109,6 +109,10 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.fabric-item-api.mixins.json");
 		}
 
+		if (isPresent("fabric-screen-api-v1")) {
+			Mixins.addConfiguration("optifabric.compat.fabric-screen-api.mixins.json");
+		}
+
 		Mixins.addConfiguration("optifabric.optifine.mixins.json");
 
 		if (isPresent("cloth-client-events-v0")) {
