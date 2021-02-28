@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipError;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -15,7 +16,7 @@ public enum OptifineResources {
 	private OptifineResources() {
 		try {
 			zip = new ZipFile(OptifabricSetup.optifineRuntimeJar);
-		} catch (ZipException e) {
+		} catch (ZipException | ZipError e) {
 			//Would've thought the classloader would have caught this sooner but whatever
 			throw new RuntimeException("Error opening Optifine jar, probably corrupt?", e);
 		} catch (IOException e) {

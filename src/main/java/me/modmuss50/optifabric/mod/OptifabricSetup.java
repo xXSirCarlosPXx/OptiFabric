@@ -29,6 +29,7 @@ import com.chocohead.mm.api.ClassTinkerers;
 
 public class OptifabricSetup implements Runnable {
 	public static File optifineRuntimeJar = null;
+	public static boolean usingScreenAPI;
 
 	//This is called early on to allow us to get the transformers in beofore minecraft starts
 	@Override
@@ -46,7 +47,7 @@ public class OptifabricSetup implements Runnable {
 		} catch (Throwable e) {
 			if (!OptifabricError.hasError()) {
 				OptifineVersion.jarType = JarType.INTERNAL_ERROR;
-				OptifabricError.setError("Failed to load optifine, check the log for more info \n\n " + e.getMessage());
+				OptifabricError.setError(e, "Failed to load OptiFine, please report this!\n\n" + e.getMessage());
 			}
 			throw new RuntimeException("Failed to setup optifine", e);
 		}
@@ -111,6 +112,7 @@ public class OptifabricSetup implements Runnable {
 
 		if (isPresent("fabric-screen-api-v1")) {
 			Mixins.addConfiguration("optifabric.compat.fabric-screen-api.mixins.json");
+			usingScreenAPI = true;
 		}
 
 		Mixins.addConfiguration("optifabric.optifine.mixins.json");

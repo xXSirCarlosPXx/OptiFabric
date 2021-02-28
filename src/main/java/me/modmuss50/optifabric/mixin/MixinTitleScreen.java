@@ -1,17 +1,8 @@
 package me.modmuss50.optifabric.mixin;
 
-import me.modmuss50.optifabric.mod.OptifabricError;
-import me.modmuss50.optifabric.mod.OptifineVersion;
+import java.io.File;
 
-import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,45 +11,95 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.client.gui.screen.ConfirmScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
+
+import net.fabricmc.loader.api.FabricLoader;
+
+import me.modmuss50.optifabric.compat.fabricscreenapi.Events;
+import me.modmuss50.optifabric.mod.OptifabricError;
+import me.modmuss50.optifabric.mod.OptifabricSetup;
+import me.modmuss50.optifabric.mod.OptifineVersion;
+
 @Mixin(TitleScreen.class)
 public abstract class MixinTitleScreen extends Screen {
-
 	@Shadow
-	@Final
-	private boolean doBackgroundFade;
-
+	private @Final boolean doBackgroundFade;
 	@Shadow
 	private long backgroundFadeStart;
 
-	protected MixinTitleScreen(Text component_1) {
-		super(component_1);
+	protected MixinTitleScreen() {
+		super(null);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Inject(method = "init", at = @At("RETURN"))
 	private void init(CallbackInfo info) {
 		if (OptifabricError.hasError()) {
-			client.openScreen(new ConfirmScreen(yes -> {
-				if (yes) {
-					Util.getOperatingSystem().open(OptifabricError.getErrorURL());
-				} else {
-					client.scheduleStop();
-				}
-			}, new LiteralText("There was an error loading OptiFabric!").formatted(Formatting.RED), new LiteralText(OptifabricError.getError()),
-					new LiteralText(OptifabricError.getHelpButtonText()).formatted(Formatting.GREEN), new LiteralText("Close Game").formatted(Formatting.RED)));
+			if (OptifabricSetup.usingScreenAPI) Events.afterInit(client, this, width, height);
+
+			String actionButtonText, helpButtonText;
+			BooleanConsumer action;
+			switch (OptifineVersion.jarType) {
+			case SOMETHING_ELSE: //Valid jar states, we shouldn't be here
+			case OPTIFINE_INSTALLER:
+			case OPTIFINE_MOD:
+				throw new IllegalStateException("No error to show!");
+
+			case MISSING: //Errors relating to the OptiFine jar, link the mods folder
+			case CORRUPT_ZIP:
+			case INCOMPATIBLE:
+			case DUPLICATED:
+				actionButtonText = "Open mods folder";
+				helpButtonText = "Open help";
+				action = help -> {
+					if (help) {
+						Util.getOperatingSystem().open("https://github.com/Chocohead/OptiFabric/blob/master/README.md");
+					} else {
+						Util.getOperatingSystem().open(new File(FabricLoader.getInstance().getGameDirectory(), "mods"));
+					}
+				};
+				break;
+
+			case INTERNAL_ERROR: //Something wrong with OptiFabric itself
+			default: {
+				String stack = OptifabricError.getErrorLog();
+				actionButtonText = stack != null ? "Copy stack-trace" : "Open logs folder";
+				helpButtonText = "Open issues";
+				action = help -> {
+					if (help) {
+						Util.getOperatingSystem().open("https://github.com/Chocohead/OptiFabric/issues");
+					} else if (stack != null) {
+						client.keyboard.setClipboard(stack);
+					} else {
+						Util.getOperatingSystem().open(new File(FabricLoader.getInstance().getGameDirectory(), "logs"));
+					}
+				};
+				break;
+			}
+			}
+
+			client.openScreen(new ConfirmScreen(action, new LiteralText("There was an error loading OptiFabric!").formatted(Formatting.RED),
+					new LiteralText(OptifabricError.getError()), new LiteralText(helpButtonText).formatted(Formatting.GREEN), new LiteralText(actionButtonText)));
 		}
 	}
 
 	@Inject(method = "render", at = @At("RETURN"))
 	private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
 		if (!OptifabricError.hasError()) {
-			float fadeTime = this.doBackgroundFade ? (float) (Util.getMeasuringTimeMs() - this.backgroundFadeStart) / 1000.0F : 1.0F;
-			float fadeColor = this.doBackgroundFade ? MathHelper.clamp(fadeTime - 1.0F, 0.0F, 1.0F) : 1.0F;
+			float fadeTime = doBackgroundFade ? Util.getMeasuringTimeMs() - backgroundFadeStart / 1000F : 1F;
+			float fadeColor = doBackgroundFade ? MathHelper.clamp(fadeTime - 1F, 0F, 1F) : 1F;
 
-			int alpha = MathHelper.ceil(fadeColor * 255.0F) << 24;
+			int alpha = MathHelper.ceil(fadeColor * 255F) << 24;
 			if ((alpha & 0xFC000000) != 0) {
-				textRenderer.drawWithShadow(matrices, OptifineVersion.version, 2, this.height - 20, 0xFFFFFF | alpha);
+				textRenderer.drawWithShadow(matrices, OptifineVersion.version, 2, height - 20, 0xFFFFFF | alpha);
 			}
 		}
 	}
-
 }
