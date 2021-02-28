@@ -235,6 +235,10 @@ public class OptifabricSetup implements Runnable {
 		} else if (isPresent("frex", "=4.2")) {
 			Mixins.addConfiguration("optifabric.compat.frex-old.mixins.json");
 		}
+
+		if (isPresent("full_slabs", ">=1.0.2")) {
+			Mixins.addConfiguration("optifabric.compat.full-slabs.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {
