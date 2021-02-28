@@ -33,6 +33,8 @@ import org.objectweb.asm.tree.MethodNode;
 
 import net.fabricmc.tinyremapper.IMappingProvider;
 
+import me.modmuss50.optifabric.util.ASMUtils;
+
 public class LambdaRebuiler implements IMappingProvider {
 	private final File optifineFile;
 	private final File minecraftClientFile;
@@ -52,8 +54,8 @@ public class LambdaRebuiler implements IMappingProvider {
 				String name = entry.getName();
 
 				if (name.endsWith(".class") && !name.startsWith("net/") && !name.startsWith("optifine/") && !name.startsWith("javax/")) {
-					ClassNode classNode = ASMUtils.asClassNode(entry, optifineJar);
-					ClassNode minecraftClass = ASMUtils.asClassNode(clientJar.getJarEntry(name), clientJar);
+					ClassNode classNode = ASMUtils.readClass(optifineJar, entry);
+					ClassNode minecraftClass = ASMUtils.readClass(clientJar, clientJar.getJarEntry(name));
 
 					if (!minecraftClass.name.equals(classNode.name)) {
 						throw new RuntimeException("Something went wrong");

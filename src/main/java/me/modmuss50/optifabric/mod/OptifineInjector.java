@@ -19,9 +19,9 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import com.chocohead.mm.api.ClassTinkerers;
 
-import me.modmuss50.optifabric.patcher.ASMUtils;
 import me.modmuss50.optifabric.patcher.ClassCache;
 import me.modmuss50.optifabric.patcher.fixes.OptifineFixer;
+import me.modmuss50.optifabric.util.ASMUtils;
 
 public class OptifineInjector {
 	private static Set<String> patched = new HashSet<>();
@@ -33,7 +33,7 @@ public class OptifineInjector {
 
 	public Optional<ClassNode> predictFuture(String className) {
 		byte[] bytes = classCache.getClass(className);
-		return bytes != null ? Optional.of(ASMUtils.readClassFromBytes(bytes)) : Optional.empty();
+		return bytes != null ? Optional.of(ASMUtils.readClass(bytes)) : Optional.empty();
 	}
 
 	public void setup() {
@@ -129,6 +129,6 @@ public class OptifineInjector {
 		if(bytes == null) {
 			throw new RuntimeException("Failed to find patched class for: " + classNode.name);
 		}
-		return ASMUtils.readClassFromBytes(bytes);
+		return ASMUtils.readClass(bytes);
 	}
 }

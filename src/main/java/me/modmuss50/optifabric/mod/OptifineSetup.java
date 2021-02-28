@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -15,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.fabricmc.loader.api.FabricLoader;
@@ -31,74 +36,72 @@ import net.fabricmc.tinyremapper.TinyRemapper;
 import net.fabricmc.tinyremapper.IMappingProvider.Member;
 import net.fabricmc.tinyremapper.OutputConsumerPath.Builder;
 
+import me.modmuss50.optifabric.mod.OptifineVersion.JarType;
 import me.modmuss50.optifabric.patcher.ClassCache;
 import me.modmuss50.optifabric.patcher.LambdaRebuiler;
-import me.modmuss50.optifabric.patcher.PatchSplitter;
 import me.modmuss50.optifabric.util.ZipUtils;
 
 public class OptifineSetup {
 	public static Pair<File, ClassCache> getRuntime() throws IOException {
+		@SuppressWarnings("deprecation") //Keeping backward compatibility with older Loader versions
 		File workingDir = new File(FabricLoader.getInstance().getGameDirectory(), ".optifine");
 		if (!workingDir.exists()) {
-			workingDir.mkdirs();
+			FileUtils.forceMkdir(workingDir);
 		}
 
 		File optifineModJar = OptifineVersion.findOptifineJar();
-		byte[] modHash = fileHash(optifineModJar);
+		byte[] modHash;
+		try (InputStream in = new FileInputStream(optifineModJar)) {
+			modHash = DigestUtils.md5(in);
+		}
 
 		File versionDir = new File(workingDir, OptifineVersion.version);
 		if (!versionDir.exists()) {
-			versionDir.mkdirs();
+			FileUtils.forceMkdir(versionDir);
 		}
 
 		File remappedJar = new File(versionDir, "Optifine-mapped.jar");
 		File optifinePatches = new File(versionDir, "Optifine.classes.gz");
 
-		ClassCache classCache = null;
-		if(remappedJar.exists() && optifinePatches.exists()){
-			classCache = ClassCache.read(optifinePatches);
+		if (remappedJar.exists() && optifinePatches.exists()) {
+			ClassCache classCache = ClassCache.read(optifinePatches);
+
 			//Validate that the classCache found is for the same input jar
-			if(!Arrays.equals(classCache.getHash(), modHash)){
+			if (Arrays.equals(classCache.getHash(), modHash)) {
+				System.out.println("Found existing patched optifine jar, using that");
+				return Pair.of(remappedJar, classCache);
+			} else {
 				System.out.println("Class cache is from a different optifine jar, deleting and re-generating");
-				classCache = null;
 				optifinePatches.delete();
 			}
-		}
-
-		if (remappedJar.exists() && classCache != null) {
-			System.out.println("Found existing patched optifine jar, using that");
-			return Pair.of(remappedJar, classCache);
+		} else {
+			System.out.println("Setting up optifine for the first time, this may take a few seconds.");
 		}
 
 		Path minecraftJar = getMinecraftJar();
 
-		if (OptifineVersion.jarType == OptifineVersion.JarType.OPTIFINE_INSTALLER) {
-			File optifineMod = new File(versionDir, "/Optifine-mod.jar");
+		if (OptifineVersion.jarType == JarType.OPTIFINE_INSTALLER) {
+			File optifineMod = new File(versionDir, "Optifine-mod.jar");
 			if (!optifineMod.exists()) {
-				OptifineInstaller.extract(optifineModJar, optifineMod, minecraftJar.toFile());
+				runInstaller(optifineModJar, optifineMod, minecraftJar.toFile());
 			}
 			optifineModJar = optifineMod;
 		}
 
-		System.out.println("Setting up optifine for the first time, this may take a few seconds.");
-
 		//A jar without srgs
-		File jarOfTheFree = new File(versionDir, "/Optifine-jarofthefree.jar");
+		File jarOfTheFree = new File(versionDir, "Optifine-jarofthefree.jar");
 
 		System.out.println("De-Volderfiying jar");
 
 		//Find all the SRG named classes and remove them
 		ZipUtils.transform(optifineModJar, (zip, zipEntry) -> {
 			String name = zipEntry.getName();
-			if(name.startsWith("com/mojang/blaze3d/platform/")){
-				if(name.contains("$")){
-					String[] split = name.replace(".class", "").split("\\$");
-					if(split.length >= 2){
-						if(split[1].length() > 2){
-							return false;
-						}
-					}
-				}
+
+			if (name.startsWith("com/mojang/blaze3d/platform/")) {
+				int split = name.indexOf('$');
+
+				//Keep the class if not of the form com/mojang/blaze3d/platform/MojangName$InnerVoldeName.class
+				return split <= 0 || name.length() - split <= 8;
 			}
 
 			return !(name.startsWith("srg/") || name.startsWith("net/minecraft/"));
@@ -109,7 +112,7 @@ public class OptifineSetup {
 		rebuilder.buildLambdaMap();
 
 		System.out.println("Remapping optifine with fixed lambda names");
-		File lambdaFixJar = new File(versionDir, "/Optifine-lambdafix.jar");
+		File lambdaFixJar = new File(versionDir, "Optifine-lambdafix.jar");
 		Path[] libraries = getLibs(minecraftJar);
 		remapOptifine(jarOfTheFree, libraries, lambdaFixJar, rebuilder);
 
@@ -117,20 +120,15 @@ public class OptifineSetup {
 		System.out.println("Remapping optifine from official to " + namespace);
 		remapOptifine(lambdaFixJar, libraries, remappedJar, createMappings("official", namespace));
 
-		classCache = PatchSplitter.generateClassCache(remappedJar, optifinePatches, modHash);
-
-		if(true){
-			//We are done, lets get rid of the stuff we no longer need
-			lambdaFixJar.delete();
-			jarOfTheFree.delete();
-
-			if(OptifineVersion.jarType == OptifineVersion.JarType.OPTIFINE_INSTALLER){
-				optifineModJar.delete();
-			}
+		//We are done, lets get rid of the stuff we no longer need
+		lambdaFixJar.delete();
+		jarOfTheFree.delete();
+		if (OptifineVersion.jarType == JarType.OPTIFINE_INSTALLER) {
+			optifineModJar.delete();
 		}
 
-		boolean extractClasses = Boolean.parseBoolean(System.getProperty("optifabric.extract", "false"));
-		if(extractClasses){
+		boolean extract = Boolean.getBoolean("optifabric.extract");
+		if (extract) {
 			System.out.println("Extracting optifine classes");
 			File optifineClasses = new File(versionDir, "optifine-classes");
 			if(optifineClasses.exists()){
@@ -139,7 +137,19 @@ public class OptifineSetup {
 			ZipUtils.extract(remappedJar, optifineClasses);
 		}
 
-		return Pair.of(remappedJar, classCache);
+		return Pair.of(remappedJar, generateClassCache(remappedJar, optifinePatches, modHash, extract));
+	}
+
+	private static void runInstaller(File installer, File output, File minecraftJar) throws IOException {
+		System.out.println("Running optifine patcher");
+
+		try (URLClassLoader classLoader = new URLClassLoader(new URL[] {installer.toURI().toURL()}, OptifineSetup.class.getClassLoader())) {
+			Class<?> clazz = classLoader.loadClass("optifine.Patcher");
+			Method method = clazz.getDeclaredMethod("process", File.class, File.class, File.class);
+			method.invoke(null, minecraftJar, installer, output);
+		} catch (ReflectiveOperationException | MalformedURLException e) {
+			throw new RuntimeException("Error running OptiFine patcher at " + installer + " on " + minecraftJar, e);
+		}
 	}
 
 	private static void remapOptifine(File input, Path[] libraries, File output, IMappingProvider mappings) throws IOException {
@@ -267,9 +277,38 @@ public class OptifineSetup {
 		return contextJars.get(0);
 	}
 
-	private static byte[] fileHash(File input) throws IOException {
-		try (InputStream is = new FileInputStream(input)) {
-			return DigestUtils.md5(is);
+	private static ClassCache generateClassCache(File from, File to, byte[] hash, boolean extractClasses) throws IOException {
+		File classesDir = new File(to.getParent(), "classes");
+		if (extractClasses) {
+			if (classesDir.exists()) {
+				FileUtils.cleanDirectory(classesDir);
+			} else {
+				FileUtils.forceMkdir(classesDir);
+			}
 		}
+		ClassCache classCache = new ClassCache(hash);
+
+		ZipUtils.transformInPlace(from, (jarFile, entry) -> {
+			String name = entry.getName();
+
+			if ((name.startsWith("net/minecraft/") || name.startsWith("com/mojang/")) && name.endsWith(".class")) {
+				try (InputStream in = jarFile.getInputStream(entry)) {
+					byte[] bytes = IOUtils.toByteArray(in);
+
+					classCache.addClass(name.substring(0, name.length() - 6), bytes);
+					if (extractClasses) {
+						FileUtils.writeByteArrayToFile(new File(classesDir, name), bytes);
+					}
+				}
+
+				return false; //Remove all the patched classes, we don't want these leaking directly on the classpath
+			} else {
+				return true;
+			}
+		});
+
+		System.out.println("Found " + classCache.getClasses().size() + " patched classes");
+		classCache.save(to);
+		return classCache;
 	}
 }

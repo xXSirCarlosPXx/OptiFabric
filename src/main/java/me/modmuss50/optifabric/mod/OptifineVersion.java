@@ -10,9 +10,7 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipError;
 import java.util.zip.ZipException;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.google.gson.stream.JsonReader;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -22,7 +20,7 @@ import org.objectweb.asm.tree.FieldNode;
 
 import net.fabricmc.loader.api.FabricLoader;
 
-import me.modmuss50.optifabric.patcher.ASMUtils;
+import me.modmuss50.optifabric.util.ASMUtils;
 import me.modmuss50.optifabric.util.ZipUtils;
 
 public class OptifineVersion {
@@ -39,11 +37,7 @@ public class OptifineVersion {
 			File optifineJar = null;
 
 			for (File file : mods) {
-				if (file.isDirectory()) {
-					continue;
-				}
-
-				if ("jar".equals(FilenameUtils.getExtension(file.getName()))) {
+				if (!file.isDirectory() && "jar".equals(FilenameUtils.getExtension(file.getName()))) {
 					JarType type = getJarType(file);
 					if (type.error) {
 						jarType = type;
@@ -58,7 +52,7 @@ public class OptifineVersion {
 						}
 
 						jarType = type;
-						optifineJar =  file;
+						optifineJar = file;
 					}
 				}
 			}
@@ -80,17 +74,17 @@ public class OptifineVersion {
 			if (jarEntry == null) {
 				return JarType.SOMETHING_ELSE;
 			}
-			classNode = ASMUtils.asClassNode(jarEntry, jarFile);
+			classNode = ASMUtils.readClass(jarFile, jarEntry);
 		} catch (ZipException | ZipError e) {
 			OptifabricError.setError("The zip at " + file + " is corrupt");
 			return JarType.CORRUPT_ZIP;
 		}
 
 		for (FieldNode fieldNode : classNode.fields) {
-			if (fieldNode.name.equals("VERSION")) {
+			if ("VERSION".equals(fieldNode.name)) {
 				version = (String) fieldNode.value;
 			}
-			if (fieldNode.name.equals("MC_VERSION")) {
+			if ("MC_VERSION".equals(fieldNode.name)) {
 				minecraftVersion = (String) fieldNode.value;
 			}
 		}
@@ -100,11 +94,19 @@ public class OptifineVersion {
 			return JarType.INCOMPATIBLE;
 		}
 
-		String currentMcVersion;
-		try (InputStreamReader in = new InputStreamReader(OptifineVersion.class.getResourceAsStream("/version.json"))) {
-			JsonObject jsonObject = new Gson().fromJson(in, JsonObject.class);
-			currentMcVersion = jsonObject.get("name").getAsString();
-		} catch (IOException | JsonParseException e) {
+		String currentMcVersion = "unknown";
+		try (JsonReader in = new JsonReader(new InputStreamReader(OptifineVersion.class.getResourceAsStream("/version.json")))) {
+			in.beginObject();
+
+			while (in.hasNext()) {
+				if ("name".equals(in.nextName())) {
+					currentMcVersion = in.nextString();
+					break;
+				} else {
+					in.skipValue();
+				}
+			}
+		} catch (IOException | IllegalStateException e) {
 			OptifabricError.setError("Failed to find current minecraft version");
 			e.printStackTrace();
 			return JarType.INTERNAL_ERROR;
