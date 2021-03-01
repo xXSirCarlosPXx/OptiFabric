@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.AnnotationNode;
@@ -120,6 +122,8 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 			if (shims.containsKey(method.name.concat(method.desc)) || Annotations.getInvisible(method, PlacatingSurrogate.class) != null) {
 				it.remove(); //Don't want to keep the shim methods
 			} else {
+				method.desc = StringUtils.replace(method.desc, "Lnull;", "Ljava/lang/Object;");
+
 				for (AbstractInsnNode insn : method.instructions) {
 					if (insn.getType() == AbstractInsnNode.METHOD_INSN) {
 						MethodInsnNode methodInsn = (MethodInsnNode) insn;

@@ -10,6 +10,8 @@ import com.google.common.base.MoreObjects;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -238,6 +240,15 @@ public class OptifabricSetup implements Runnable {
 
 		if (isPresent("full_slabs", ">=1.0.2")) {
 			Mixins.addConfiguration("optifabric.compat.full-slabs.mixins.json");
+		}
+
+		if (isPresent("amecsapi", "<1.1.2")) {
+			Mixins.addConfiguration("optifabric.compat.amecsapi.mixins.json");
+
+			ClassWriter writer = new ClassWriter(0);
+			writer.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER, "null", null, "java/lang/Object", null);
+			writer.visitEnd(); //Just something to extend Object, only Mixin should see it
+			ClassTinkerers.define("null", writer.toByteArray());
 		}
 	}
 
