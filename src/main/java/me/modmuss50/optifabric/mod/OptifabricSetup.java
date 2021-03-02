@@ -250,6 +250,21 @@ public class OptifabricSetup implements Runnable {
 			writer.visitEnd(); //Just something to extend Object, only Mixin should see it
 			ClassTinkerers.define("null", writer.toByteArray());
 		}
+
+		if (isPresent("pswg")) {
+			Mixins.addConfiguration("optifabric.compat.pswg.mixins.json");
+
+			if (isPresent("pswg", ">=1.16.4-0.0.15")) {
+				injector.predictFuture(RemappingUtils.getClassName("class_276")).ifPresent(node -> {//FrameBuffer
+					for (FieldNode field : node.fields) {
+						if ("stencilEnabled".equals(field.name) && "Z".equals(field.desc)) {
+							Mixins.addConfiguration("optifabric.compat.pswg.extra-mixins.json");
+							break;
+						}
+					}
+				});
+			}
+		}
 	}
 
 	private static boolean isPresent(String modID) {
