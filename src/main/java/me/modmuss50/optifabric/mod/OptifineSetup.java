@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.zip.ZipError;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -82,8 +85,23 @@ public class OptifineSetup {
 
 		if (OptifineVersion.jarType == JarType.OPTIFINE_INSTALLER) {
 			File optifineMod = new File(versionDir, "Optifine-mod.jar");
-			if (!optifineMod.exists()) {
-				runInstaller(optifineModJar, optifineMod, minecraftJar.toFile());
+			out: if (!optifineMod.exists()) {
+				for (int attempt = 1; attempt <= 3; attempt++) {
+					runInstaller(optifineModJar, optifineMod, minecraftJar.toFile());
+
+					try {
+						new ZipFile(optifineMod).close();
+					} catch (ZipException | ZipError e) {
+						optifineMod.delete();
+						continue;
+					}
+
+					break out; //Produced a valid extracted jar
+				}
+
+				OptifineVersion.jarType = JarType.CORRUPT_ZIP;
+				OptifabricError.setError("OptiFine installer keeps producing corrupt jars!\nRan: %s 3 times\nMinecraft jar: %s", optifineModJar, minecraftJar);
+				throw new ZipException("Ran OptiFine installer (" + optifineModJar + ") three times without a valid jar produced");
 			}
 			optifineModJar = optifineMod;
 		}
