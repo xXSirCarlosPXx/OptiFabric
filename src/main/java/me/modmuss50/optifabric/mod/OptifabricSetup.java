@@ -269,6 +269,10 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("custom-fog", ">=1.2")) {
 			Mixins.addConfiguration("optifabric.compat.custom-fog.mixins.json");
 		}
+
+		if (isPresent("smooth-chunks")) {
+			Mixins.addConfiguration("optifabric.compat.smooth-chunks.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {
