@@ -94,6 +94,7 @@ public class ZipUtils {
 		try {
 			transform(zipOrigin, ZipFile.OPEN_READ, filter, zipDestination);
 		} catch (IOException e) {
+			FileUtils.deleteQuietly(zipDestination);
 			throw new UncheckedIOException("Error transforming " + zipOrigin, e);
 		}
 	}

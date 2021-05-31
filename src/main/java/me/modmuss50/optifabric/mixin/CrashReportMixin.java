@@ -1,5 +1,8 @@
 package me.modmuss50.optifabric.mixin;
 
+import java.io.File;
+import java.util.Optional;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,7 +54,7 @@ abstract class CrashReportMixin {
 					return "Unsearched";
 				}
 			})
-			.add("OptiFine remapped jar", OptifabricSetup.optifineRuntimeJar)
+			.add("OptiFine remapped jar", Optional.ofNullable(OptifabricSetup.optifineRuntimeJar).map(jar -> jar.toString().replace(File.separatorChar, '/')).orElse(null))
 			.add("OptiFabric error", () -> {
 				if (OptifabricError.hasError()) {
 					return OptifabricError.getError();
