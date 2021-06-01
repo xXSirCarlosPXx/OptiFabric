@@ -210,6 +210,20 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.charm-old.mixins.json");
 		} else if (isPresent("charm", ">=2.1")) {
 			Mixins.addConfiguration("optifabric.compat.charm.mixins.json");
+
+			if (isPresent("charm", ">=2.2.2")) {
+				injector.predictFuture(RemappingUtils.getClassName("class_156")).ifPresent(node -> {//Util
+					String desc = "(Lcom/mojang/datafixers/DSL$TypeReference;Ljava/lang/String;)Lcom/mojang/datafixers/types/Type;";
+					String getChoiceTypeInternal = RemappingUtils.getMethodName("class_156", "method_29191", desc); //Util, getChoiceTypeInternal
+
+					for (MethodNode method : node.methods) {
+						if (getChoiceTypeInternal.equals(method.name) && desc.equals(method.desc)) {
+							Mixins.addConfiguration("optifabric.compat.charm-plus.mixins.json");
+							break;
+						}
+					}
+				});
+			}	
 		}
 
 		if (isPresent("voxelmap")) {
