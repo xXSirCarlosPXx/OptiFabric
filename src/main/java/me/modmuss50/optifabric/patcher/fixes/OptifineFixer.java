@@ -11,6 +11,7 @@ import java.util.Set;
 import net.fabricmc.loader.api.FabricLoader;
 
 import me.modmuss50.optifabric.compat.fabricrenderingfluids.FluidRendererFix;
+import me.modmuss50.optifabric.compat.uglyscoreboardfix.InGameHudFix;
 import me.modmuss50.optifabric.util.RemappingUtils;
 
 public class OptifineFixer {
@@ -45,6 +46,11 @@ public class OptifineFixer {
 		if (FabricLoader.getInstance().isModLoaded("fabric-rendering-fluids-v1")) {
 			//net/minecraft/client/render/block/FluidRenderer
 			registerFix("class_775", new FluidRendererFix());
+		}
+
+		if (FabricLoader.getInstance().isModLoaded("uglyscoreboardfix")) {
+			//net/minecraft/client/gui/hud/InGameHud
+			registerFix("class_329", new InGameHudFix());
 		}
 	}
 
