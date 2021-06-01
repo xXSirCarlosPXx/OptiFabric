@@ -273,6 +273,10 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("smooth-chunks")) {
 			Mixins.addConfiguration("optifabric.compat.smooth-chunks.mixins.json");
 		}
+
+		if (isPresent("enhancedcelestials")) {
+			Mixins.addConfiguration("optifabric.compat.enhancedcelestials.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {
