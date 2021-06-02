@@ -209,8 +209,10 @@ public class OptifineSetup {
 		});
 
 		ClassDef clientEntityHandler = nameToClass.get("net/minecraft/class_638$class_5612");
-		ClassDef clientWorld = nameToClass.get("net/minecraft/class_638");
-		extraFields.put(new Member(clientEntityHandler.getName(from), "this$0", 'L' + clientWorld.getName(from) + ';'), "field_27735");
+		if (clientEntityHandler != null) {//Only present in 1.17.x (20w45a+)
+			ClassDef clientWorld = nameToClass.get("net/minecraft/class_638");
+			extraFields.put(new Member(clientEntityHandler.getName(from), "this$0", 'L' + clientWorld.getName(from) + ';'), "field_27735");
+		}
 
 		//In dev
 		if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
