@@ -291,6 +291,10 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("enhancedcelestials")) {
 			Mixins.addConfiguration("optifabric.compat.enhancedcelestials.mixins.json");
 		}
+
+		if (isPresent("cullparticles") && particlesPresent.getAsBoolean()) {
+			Mixins.addConfiguration("optifabric.compat.cullparticles.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {
