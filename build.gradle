@@ -32,17 +32,16 @@ repositories {
 		name "Modmuss50 Repository"
 		url 'https://maven.fabricmc.net/'
 	}
-	maven { url "https://dl.bintray.com/shedaniel/shedaniel-mods" }
+	maven { url 'https://maven.shedaniel.me/' }
 	maven {
 		name = "Clothesline"
 		url 'https://maven.jamieswhiteshirt.com/libs-release/'
 	}
 	maven { url 'https://maven.blamejared.com' }
-	maven { url 'https://dl.bintray.com/earthcomputer/mods' }
 	maven { url 'http://modmaven.k-4u.nl/artifactory/local-releases/' }
 	maven { url 'https://mod-buildcraft.com/maven' }
 	maven { url 'https://maven.dblsaiko.net' }
-	maven { url 'https://dl.bintray.com/adriantodt/maven' }
+	maven { url 'https://maven.terraformersmc.com/' }
 	maven { url 'https://www.cursemaven.com' }
 	maven { url 'https://jitpack.io' }
 }
@@ -81,10 +80,10 @@ dependencies {
 	}
 	modRuntime 'curse.maven:malilib-303119:3113699'
 	modRuntime 'curse.maven:watson-361509:3130935'
-	modRuntime 'net.earthcomputer:multiconnect:1.3.19:api'
-	modRuntime 'net.earthcomputer:multiconnect:1.3.19:slim'
+	modRuntime 'net.earthcomputer.multiconnect:multiconnect-api:1.3.19'
+	modRuntime 'net.earthcomputer.multiconnect:multiconnect-slim:1.3.19'
 	modRuntime 'curse.maven:now-playing-398652:3041887'
-	modRuntime ('com.github.apace100:origins-fabric:0.4.1') {
+	modRuntime ('com.github.apace100:origins-fabric:0.7.3') {
 		exclude(group: "net.fabricmc")
 		exclude(group: "net.fabricmc.fabric-api")
 	}
