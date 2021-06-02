@@ -137,6 +137,9 @@ compileJava {
 		'Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;Z' + 
 		'Ljava/util/Random;JILnet/minecraftforge/client/model/data/IModelData;)Z', 'renderModel', 'renderModel'
 		method 'net/optifine/BlockPosM', '(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Ljava/lang/Iterable;', 'getAllInBoxMutable', 'getAllInBoxMutable'
+		it.class 'net/minecraft/world/HeightLimitView', 'net/minecraft/class_5539'
+		method 'net/minecraft/util/crash/CrashReportSection', '(Lnet/minecraft/util/crash/CrashReportSection;Lnet/minecraft/world/HeightLimitView;' + 
+		'Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V', 'addBlockInfo', 'method_586'
 	}
 }
 

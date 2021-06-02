@@ -208,6 +208,10 @@ public class OptifineSetup {
 			extraFields.put(new Member(particleManager.getName(from), field.getName(from), "Ljava/util/Map;"), field.getName(to));
 		});
 
+		ClassDef clientEntityHandler = nameToClass.get("net/minecraft/class_638$class_5612");
+		ClassDef clientWorld = nameToClass.get("net/minecraft/class_638");
+		extraFields.put(new Member(clientEntityHandler.getName(from), "this$0", 'L' + clientWorld.getName(from) + ';'), "field_27735");
+
 		//In dev
 		if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
 			ClassDef option = nameToClass.get("net/minecraft/class_316");
