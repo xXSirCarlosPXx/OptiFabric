@@ -22,7 +22,7 @@ abstract class BackgroundRendererMixin {
 	private static void setFogFalloff(Camera camera, FogType fogType, float viewDistance, boolean thickFog, CallbackInfo call) {
 	}
 
-	@Inject(method = "setupFog", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setupNvFogDistance()V"))
+	@Inject(method = "setupFog", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setupNvFogDistance()V"), remap = false)
 	private static void setFogFalloff(Camera camera, FogType fogType, float viewDistance, boolean thickFog, float partialTicks, CallbackInfo call) {
 		setFogFalloff(camera, fogType, viewDistance, thickFog, call, camera.getSubmergedFluidState(), camera.getFocusedEntity());
 	}
