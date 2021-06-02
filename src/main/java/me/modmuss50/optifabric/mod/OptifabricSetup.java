@@ -295,6 +295,10 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("cullparticles") && particlesPresent.getAsBoolean()) {
 			Mixins.addConfiguration("optifabric.compat.cullparticles.mixins.json");
 		}
+
+		if (isPresent("the_aether")) {
+			Mixins.addConfiguration("optifabric.compat.aether.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {
