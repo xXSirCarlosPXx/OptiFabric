@@ -19,7 +19,7 @@ import me.modmuss50.optifabric.util.RemappingUtils;
 public class ImagesMixinPlugin extends InterceptingMixinPlugin {
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		if ("BuiltinModelItemRendererMixin".equals(mixinInfo.getName())) {//BuiltinModelItemRenderer, render, (ItemStack, ModelTransformation$Mode, MatrixStack, VertexConsumerProvider)
+		if (mixinInfo.getName().endsWith("BuiltinModelItemRendererMixin")) {//BuiltinModelItemRenderer, render, (ItemStack, ModelTransformation$Mode, MatrixStack, VertexConsumerProvider)
 			String render = RemappingUtils.getMethodName("class_756", "method_3166", "(Lnet/minecraft/class_1799;Lnet/minecraft/class_809$class_811;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V");
 			//BannerBlockEntityRenderer, renderCanvas, (MatrixStack, VertexConsumerProvider, ModelPart, SpriteIdentifier)
 			Member renderCanvas = RemappingUtils.mapMethod("class_823", "method_23802", "(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;IILnet/minecraft/class_630;Lnet/minecraft/class_4730;ZLjava/util/List;Z)V");

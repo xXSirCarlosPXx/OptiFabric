@@ -1,6 +1,6 @@
 {
 	"parent": "optifabric.mixins.json",
-	"package": "me.modmuss50.optifabric.compat.images.mixin.older",
+	"package": "me.modmuss50.optifabric.compat.images.mixin.old",
 	"plugin": "me.modmuss50.optifabric.compat.images.ImagesMixinPlugin",
 	"mixins": [
 		"BuiltinModelItemRendererMixin"

@@ -235,8 +235,10 @@ public class OptifabricSetup implements Runnable {
 		}
 
 		if (isPresent("images", "=0.3.0")) {
+			Mixins.addConfiguration("optifabric.compat.images-older.mixins.json");
+		} else if (isPresent("images", ">=0.3.1 <1.0.1")) {
 			Mixins.addConfiguration("optifabric.compat.images-old.mixins.json");
-		} else if (isPresent("images", ">=0.3.1")) {
+		} else if (isPresent("images", ">=1.0.1")) {
 			Mixins.addConfiguration("optifabric.compat.images.mixins.json");
 		}
 

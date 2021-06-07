@@ -1,4 +1,4 @@
-package me.modmuss50.optifabric.compat.images.mixin;
+package me.modmuss50.optifabric.compat.images.mixin.old;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
