@@ -4,6 +4,6 @@
 	"plugin": "me.modmuss50.optifabric.compat.frex.FrexMixinPlugin",
 	"mixins": [
 		"ChunkCacheOF",
-		"RebuildTaskOldMixin"
+		"old.RebuildTaskMixin"
 	]
 }

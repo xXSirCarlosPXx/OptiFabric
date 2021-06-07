@@ -81,7 +81,7 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 		throw new IllegalArgumentException("Can't find Mixin class " + mixinTarget + " targetting " + targetClass);
 	}
 
-	private static String coerceDesc(MethodNode method) {
+	protected static String coerceDesc(MethodNode method) {
 		if (method.invisibleParameterAnnotations != null) {
 			Type[] arguments = Type.getArgumentTypes(method.desc);
 			boolean madeChange = false;

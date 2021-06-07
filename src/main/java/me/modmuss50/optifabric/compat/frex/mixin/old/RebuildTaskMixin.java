@@ -1,4 +1,4 @@
-package me.modmuss50.optifabric.compat.frex.mixin;
+package me.modmuss50.optifabric.compat.frex.mixin.old;
 
 import java.util.Random;
 import java.util.Set;
@@ -25,10 +25,11 @@ import me.modmuss50.optifabric.compat.LoudCoerce;
 import me.modmuss50.optifabric.compat.PlacatingSurrogate;
 import me.modmuss50.optifabric.compat.Shim;
 import me.modmuss50.optifabric.compat.frex.BridgedChunkRendererRegion;
+import me.modmuss50.optifabric.compat.frex.mixin.ChunkCacheOF;
 
 @Mixin(targets = "net.minecraft.client.render.chunk.ChunkBuilder$BuiltChunk$RebuildTask")
 @InterceptingMixin("grondag/frex/mixin/client/render/chunk/ChunkBuilderMixin")
-abstract class RebuildTaskOldMixin {
+abstract class RebuildTaskMixin {
 	@PlacatingSurrogate
 	private void initializeContext(float cameraX, float cameraY, float cameraZ, ChunkData data, BlockBufferBuilderStorage buffers, CallbackInfoReturnable<Set<BlockEntity>> call,
 			int one, BlockPos origin, BlockPos edge, ChunkOcclusionDataBuilder occlusionDataBuilder, Set<BlockEntity> bes, MatrixStack matrices,
