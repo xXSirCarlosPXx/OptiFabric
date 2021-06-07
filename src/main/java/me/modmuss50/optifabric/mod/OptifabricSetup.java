@@ -299,6 +299,10 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("the_aether")) {
 			Mixins.addConfiguration("optifabric.compat.aether.mixins.json");
 		}
+
+		if (isPresent("stacc")) {
+			Mixins.addConfiguration("optifabric.compat.stacc.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {

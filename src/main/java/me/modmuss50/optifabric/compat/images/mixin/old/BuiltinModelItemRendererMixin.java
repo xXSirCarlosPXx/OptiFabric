@@ -1,4 +1,4 @@
-package me.modmuss50.optifabric.compat.images.mixin.old;
+package me.modmuss50.optifabric.compat.images.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,7 +15,7 @@ import me.modmuss50.optifabric.compat.InterceptingMixin;
 import me.modmuss50.optifabric.compat.Shim;
 
 @Mixin(BuiltinModelItemRenderer.class)
-@InterceptingMixin("net/sorenon/images/mixin/BuiltinModelItemRendererMixin")
+@InterceptingMixin("net/sorenon/images/mixin/client/BuiltinModelItemRendererMixin")
 abstract class BuiltinModelItemRendererMixin {
 	@Shim
 	private native void inject_render(ItemStack stack, Mode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, CallbackInfo call);
