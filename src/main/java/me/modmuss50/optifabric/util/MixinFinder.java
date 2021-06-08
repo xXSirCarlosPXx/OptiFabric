@@ -87,8 +87,16 @@ public class MixinFinder {
 
 		Mixin(IMixinInfo mixin) {
 			this.mixin = mixin;
+			info = getInfo(mixin);
+			assert info.isMixin();
+		}
+
+		private static ClassInfo getInfo(IMixinInfo mixin) {
+			ClassInfo out = ClassInfo.fromCache(mixin.getClassName());
+			if (out != null) return out;
+
 			try {
-				info = (ClassInfo) FieldUtils.readDeclaredField(mixin, "info", true);
+				return (ClassInfo) FieldUtils.readDeclaredField(mixin, "info", true);
 			} catch (ReflectiveOperationException e) {
 				throw new RuntimeException("Error getting class info from " + mixin, e);
 			}

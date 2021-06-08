@@ -99,7 +99,7 @@ public class OptifineVersion {
 			in.beginObject();
 
 			while (in.hasNext()) {
-				if ("name".equals(in.nextName())) {
+				if ("id".equals(in.nextName())) {
 					currentMcVersion = in.nextString();
 					break;
 				} else {

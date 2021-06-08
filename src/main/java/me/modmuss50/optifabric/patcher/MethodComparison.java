@@ -8,6 +8,7 @@
 package me.modmuss50.optifabric.patcher;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -156,6 +157,10 @@ class MethodComparison {
 				default:
 					throw new IllegalStateException("Unexpected impl tag: " + implA.getTag());
 				}
+			} else if ("java/lang/invoke/StringConcatFactory".equals(a.bsm.getOwner())) {
+				 return true; //Could check the end result format...
+			} else if ("java/lang/runtime/ObjectMethods".equals(a.bsm.getOwner())) {
+				return Objects.equals(a.name, b.name) && Arrays.asList(a.bsmArgs).subList(2, a.bsmArgs.length).equals(Arrays.asList(b.bsmArgs).subList(2, b.bsmArgs.length));
 			} else {
 				throw new IllegalStateException(String.format("Unknown invokedynamic bsm: %s#%s%s (tag=%d iif=%b)", a.bsm.getOwner(), a.bsm.getName(), a.bsm.getDesc(), a.bsm.getTag(), a.bsm.isInterface()));
 			}
@@ -273,6 +278,8 @@ class MethodComparison {
 
 				if (isJavaLambdaMetafactory(idin.bsm)) {
 					instructionEater.accept(idin);
+				} else if ("java/lang/invoke/StringConcatFactory".equals(idin.bsm.getOwner()) || "java/lang/runtime/ObjectMethods".equals(idin.bsm.getOwner())) {
+					//These won't have any methods within the class to find
 				} else {
 					throw new IllegalStateException(String.format("Unknown invokedynamic bsm: %s#%s%s (tag=%d iif=%b)", idin.bsm.getOwner(), idin.bsm.getName(), idin.bsm.getDesc(), idin.bsm.getTag(), idin.bsm.isInterface()));
 				}

@@ -3,6 +3,8 @@ package me.modmuss50.optifabric.mixin;
 import java.io.File;
 import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.ConstructorUtils;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,8 +20,16 @@ import me.modmuss50.optifabric.mod.OptifineVersion;
 
 @Mixin(CrashReport.class)
 abstract class CrashReportMixin {
+	private static CrashReportSection makeSection(CrashReport crash, String name) {
+		try {
+			return ConstructorUtils.invokeExactConstructor(CrashReportSection.class, name);
+		} catch (ReflectiveOperationException e) {
+			return new CrashReportSection(crash, name);
+		}
+	}
+
 	@Unique
-	private final CrashReportSection optifine = new CrashReportSection((CrashReport) (Object) this, "OptiFabric")
+	private final CrashReportSection optifine = makeSection((CrashReport) (Object) this, "OptiFabric")
 			.add("OptiFine jar designed for", OptifineVersion.minecraftVersion)
 			.add("OptiFine jar version", OptifineVersion.version)
 			.add("OptiFine jar status", () -> {
