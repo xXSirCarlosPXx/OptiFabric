@@ -305,6 +305,10 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("stacc")) {
 			Mixins.addConfiguration("optifabric.compat.stacc.mixins.json");
 		}
+
+		if (isPresent("bannerpp")) {
+			Mixins.addConfiguration("optifabric.compat.bannerpp.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {
