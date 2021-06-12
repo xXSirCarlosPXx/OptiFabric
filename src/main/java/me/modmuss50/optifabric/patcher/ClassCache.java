@@ -36,6 +36,7 @@ import me.modmuss50.optifabric.util.RemappingUtils;
 public class ClassCache {
 	private final byte[] hash;
 	private final Map<String, byte[]> classes = new HashMap<>();
+	private boolean converted;
 
 	public ClassCache(byte[] hash) {
 		this.hash = hash;
@@ -79,7 +80,8 @@ public class ClassCache {
 			char formatRevision = dis.readChar(); //Check the format of the file
 			boolean isFormatA = formatRevision == 'A';
 			boolean isFormatB = formatRevision == 'B';
-			if (!isFormatA && !isFormatB && formatRevision != 'C') return new ClassCache(null);
+			boolean isFormatC = formatRevision == 'C';
+			if (!isFormatA && !isFormatB && !isFormatC && formatRevision != 'D') return new ClassCache(null);
 
 			long expectedCRC = dis.readLong();
 
@@ -139,6 +141,16 @@ public class ClassCache {
 				}
 			}
 
+			if (isFormatA || isFormatB || isFormatC) {
+				try (StaticFuzzer fuzzer = new StaticFuzzer()) {
+					for (Entry<String, byte[]> entry : classCache.classes.entrySet()) {
+						entry.setValue(fuzzer.apply(entry.getValue()));
+					}
+				}
+
+				classCache.converted = true;
+			}
+
 			return classCache;
 		}
 	}
@@ -149,7 +161,7 @@ public class ClassCache {
 		}
 
 		try (DataOutputStream dos = new DataOutputStream(new GZIPOutputStream(new FileOutputStream(output)))) {
-			dos.writeChar('C'); //Format version
+			dos.writeChar('D'); //Format version
 			dos.writeLong(calculateCRC()); //Expected CRC to get from fully reading
 
 			//Write the hash
@@ -172,5 +184,9 @@ public class ClassCache {
 				dos.write(bytes);
 			}
 		}
+	}
+
+	public boolean isConverted() {
+		return converted;
 	}
 }

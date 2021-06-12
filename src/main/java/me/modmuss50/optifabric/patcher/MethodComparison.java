@@ -41,8 +41,12 @@ class MethodComparison {
 	private final List<Lambda> patchedLambdas = new ArrayList<>();
 
 	public MethodComparison(MethodNode original, MethodNode patched) {
+		this(original, patched, false);
+	}
+
+	MethodComparison(MethodNode original, MethodNode patched, boolean permissive) {
 		assert Objects.equals(original.name, patched.name);
-		assert Objects.equals(original.desc, patched.desc);
+		assert Objects.equals(original.desc, patched.desc) || permissive;
 		node = patched;
 
 		effectivelyEqual = compare(original.instructions, patched.instructions);
@@ -240,7 +244,7 @@ class MethodComparison {
 		}
 	}
 
-	private static boolean isJavaLambdaMetafactory(Handle bsm) {
+	static boolean isJavaLambdaMetafactory(Handle bsm) {
 		return bsm.getTag() == Opcodes.H_INVOKESTATIC
 				&& "java/lang/invoke/LambdaMetafactory".equals(bsm.getOwner())
 				&& ("metafactory".equals(bsm.getName())
@@ -305,5 +309,10 @@ class MethodComparison {
 
 	public List<Lambda> getPatchedLambads() {
 		return Collections.unmodifiableList(patchedLambdas);
+	}
+
+	@Override
+	public String toString() {
+		return node.name.concat(node.desc);
 	}
 }
