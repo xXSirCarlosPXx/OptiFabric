@@ -1,5 +1,5 @@
 {
-	"parent": "optifabric.compat.carpet.mixins.json",
+	"parent": "optifabric.mixins.json",
 	"package": "me.modmuss50.optifabric.compat.carpet.mixin",
 	"plugin": "me.modmuss50.optifabric.compat.carpet.CarpetExtraMixinPlugin",
 	"mixins": [

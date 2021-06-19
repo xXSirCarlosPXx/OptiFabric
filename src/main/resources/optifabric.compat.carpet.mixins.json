@@ -3,7 +3,6 @@
 	"package": "me.modmuss50.optifabric.compat.carpet.mixin",
 	"plugin": "me.modmuss50.optifabric.compat.InterceptingMixinPlugin",
 	"mixins": [
-		"ThreadedAnvilChunkStorageMixin",
 		"WorldRendererMixin"
 	]
 }

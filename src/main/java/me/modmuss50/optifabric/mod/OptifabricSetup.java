@@ -175,7 +175,9 @@ public class OptifabricSetup implements Runnable {
 		}
 
 		if (isPresent("carpet")) {
-			Mixins.addConfiguration("optifabric.compat.carpet.mixins.json");
+			if (!isPresent("minecraft", "1.17.x")) {
+				Mixins.addConfiguration("optifabric.compat.carpet.mixins.json");
+			}
 
 			if (particlesPresent.getAsBoolean()) {
 				Mixins.addConfiguration("optifabric.compat.carpet.extra-mixins.json");
