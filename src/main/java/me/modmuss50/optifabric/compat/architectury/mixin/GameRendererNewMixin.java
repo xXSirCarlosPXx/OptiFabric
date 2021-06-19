@@ -28,7 +28,7 @@ abstract class GameRendererNewMixin {
 
 	@Inject(method = "render(FJZ)V", locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true,
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V", ordinal = 0))
-	private void renderScreenPre(float tickDelta, long startTime, boolean tick, CallbackInfo call, int mouseX, int mouseY, Window window, Matrix4f projection, MatrixStack matrices) {
+	private void renderScreenPre(float tickDelta, long startTime, boolean tick, CallbackInfo call, int mouseX, int mouseY, Window window, Matrix4f projection, MatrixStack modelView, MatrixStack matrices) {
 		renderScreenPre(tickDelta, startTime, tick, call, mouseX, mouseY, matrices);
 	}
 
@@ -41,7 +41,7 @@ abstract class GameRendererNewMixin {
 
 	@Inject(method = "render(FJZ)V", locals = LocalCapture.CAPTURE_FAILHARD,
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V", shift = Shift.AFTER, ordinal = 0))
-	private void renderScreenPost(float tickDelta, long startTime, boolean tick, CallbackInfo call, int mouseX, int mouseY, Window window, Matrix4f projection, MatrixStack matrices) {
+	private void renderScreenPost(float tickDelta, long startTime, boolean tick, CallbackInfo call, int mouseX, int mouseY, Window window, Matrix4f projection, MatrixStack modelView, MatrixStack matrices) {
 		renderScreenPost(tickDelta, startTime, tick, call, mouseX, mouseY, matrices);
 	}
 }

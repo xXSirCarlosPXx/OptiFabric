@@ -6,9 +6,7 @@ import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.Map.Entry;
@@ -150,7 +148,7 @@ public class StaticFuzzer extends LambdaRebuilder implements ThrowingFunction<In
 			memberToAccess.put(key, method.access);
 		}
 
-		Set<String> staticFlip = new HashSet<>();
+		Map<String, String> staticFlip = new HashMap<>();
 		for (MethodNode method : optifine.methods) {
 			String key = method.name.concat(method.desc);
 
@@ -159,39 +157,36 @@ public class StaticFuzzer extends LambdaRebuilder implements ThrowingFunction<In
 			int access = memberToAccess.getInt(remap);
 			if (access == -1) throw new IllegalStateException("Unable to find vanilla method " + minecraft.name + '#' + remap);
 
-			if (Modifier.isStatic(method.access) != Modifier.isStatic(access)) {
-				if (Modifier.isPrivate(method.access)) {//We'll just locally fix the difference
-					staticFlip.add(key);
-				} else {
-					if (Modifier.isStatic(method.access)) {//Become static, previously wasn't
+			if (Modifier.isStatic(method.access) != Modifier.isStatic(access)) {					
+				if (Modifier.isStatic(method.access)) {//Become static, previously wasn't
+					if (Modifier.isPrivate(method.access)) {
 						Type[] args = Type.getArgumentTypes(method.desc);
-
+	
 						if (args.length >= 1 && optifine.name.equals(args[0].getInternalName())) {//Could we fix it quickly?
-							staticFlip.add(method.name.concat(method.desc));									
-						} else {//Not really
-							System.err.println("Method has become static: " + optifine.name + '#' + key);
-						}
-					} else {//No longer static, previously was
-						System.err.println("Method is no longer static: " + optifine.name + '#' + key);
+							staticFlip.put(method.name.concat(method.desc), Type.getMethodDescriptor(Type.getReturnType(method.desc), Arrays.copyOfRange(args, 1, args.length)));
+							continue;
+						}						
 					}
+
+					throw new UnsupportedOperationException("Method has become static: " + optifine.name + '#' + key);
+				} else {//No longer static, previously was
+					if (Modifier.isPrivate(method.access)) {//We'll add this as a parameter as we can fix all the uses
+						staticFlip.put(key, "(L" + optifine.name + ';' + method.desc.substring(1));
+						continue;
+					}
+
+					//More consequential fixes will be needed
+					throw new UnsupportedOperationException("Method is no longer static: " + optifine.name + '#' + key);
 				}
 			}
 		}
 
 		if (!staticFlip.isEmpty()) {
 			for (MethodNode method : optifine.methods) {
-				if (staticFlip.contains(method.name.concat(method.desc))) {
-					if (Modifier.isStatic(method.access ^= Modifier.STATIC)) {//Method made static, need to add this as a parameter
-						method.desc = "(L" + optifine.name + ';' + method.desc.substring(1);
-					} else {//Method no longer static, need to add a this somehow
-						Type[] args = Type.getArgumentTypes(method.desc);
-
-						if (args.length >= 1 && optifine.name.equals(args[0].getInternalName())) {//Just remove the leading type argument
-							method.desc = Type.getMethodDescriptor(Type.getReturnType(method.desc), Arrays.copyOfRange(args, 1, args.length));									
-						} else {//More of a nuisance, all the LVT indices will need bumping up by one
-							throw new UnsupportedOperationException("Removing static from " + optifine.name + '#' + method.name + method.desc + " is a bit more effort");
-						}
-					}
+				String newDesc = staticFlip.get(method.name.concat(method.desc));
+				if (newDesc != null) {
+					method.access ^= Modifier.STATIC;
+					method.desc = newDesc;
 				}
 
 				for (AbstractInsnNode insn : method.instructions) {
@@ -199,8 +194,12 @@ public class StaticFuzzer extends LambdaRebuilder implements ThrowingFunction<In
 					case AbstractInsnNode.METHOD_INSN: {
 						MethodInsnNode minsn = (MethodInsnNode) insn;
 
-						if (optifine.name.equals(minsn.owner) && staticFlip.contains(minsn.name.concat(minsn.desc))) {
-							minsn.setOpcode(minsn.getOpcode() == Opcodes.INVOKESTATIC ? Opcodes.INVOKEVIRTUAL : Opcodes.INVOKESTATIC);
+						if (optifine.name.equals(minsn.owner)) {
+							newDesc = staticFlip.get(minsn.name.concat(minsn.desc));
+							if (newDesc != null) {
+								minsn.setOpcode(minsn.getOpcode() == Opcodes.INVOKESTATIC ? Opcodes.INVOKEVIRTUAL : Opcodes.INVOKESTATIC);
+								minsn.desc = newDesc;
+							}
 						}
 						break;
 					}
@@ -210,9 +209,13 @@ public class StaticFuzzer extends LambdaRebuilder implements ThrowingFunction<In
 
 						if (MethodComparison.isJavaLambdaMetafactory(dinsn.bsm)) {
 							Handle lambda = (Handle) dinsn.bsmArgs[1];
-							if (optifine.name.equals(lambda.getOwner()) && staticFlip.contains(lambda.getName().concat(lambda.getDesc()))) {
-								dinsn.bsmArgs[1] = new Handle(lambda.getTag() == Opcodes.H_INVOKESTATIC ? Opcodes.H_INVOKEVIRTUAL : Opcodes.H_INVOKESTATIC,
-																lambda.getOwner(), lambda.getName(), lambda.getDesc(), lambda.isInterface());
+
+							if (optifine.name.equals(lambda.getOwner())) {
+								newDesc = staticFlip.get(lambda.getName().concat(lambda.getDesc()));
+								if (newDesc != null) {
+									dinsn.bsmArgs[1] = new Handle(lambda.getTag() == Opcodes.H_INVOKESTATIC ? Opcodes.H_INVOKEVIRTUAL : Opcodes.H_INVOKESTATIC,
+											lambda.getOwner(), lambda.getName(), newDesc, lambda.isInterface());	
+								}
 							}
 						}
 						break;
