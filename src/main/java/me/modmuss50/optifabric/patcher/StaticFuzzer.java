@@ -71,19 +71,50 @@ public class StaticFuzzer extends LambdaRebuilder implements ThrowingFunction<In
 		reader.accept(optifine, 0);
 		findLambdas(vanilla, optifine);
 
+		Map<String, String> remapped = new HashMap<>();
 		Map<String, String> toCheck = new HashMap<>();
 		for (Entry<Member, Pair<String, String>> entry : fixes.entrySet()) {
 			Member lambda = entry.getKey();
 			Pair<String, String> remap = entry.getValue();
 			assert lambda.owner.equals(reader.getClassName());
-			toCheck.put(lambda.name.concat(lambda.desc), remap.getLeft().concat(remap.getRight()));
+			remapped.put(lambda.name.concat(lambda.desc), remap.getLeft());
+			toCheck.put(remap.getLeft().concat(lambda.desc), remap.getLeft().concat(remap.getRight()));
 		}
 
+		assert remapped.size() == toCheck.size();
 		if (toCheck.isEmpty()) {
 			assert fixes.isEmpty();
 			return in;
 		} else {
 			fixes.clear();
+			for (MethodNode method : optifine.methods) {
+				for (AbstractInsnNode insn : method.instructions) {
+					switch (insn.getType()) {
+					case AbstractInsnNode.METHOD_INSN: {
+						MethodInsnNode minsn = (MethodInsnNode) insn;
+
+						if (optifine.name.equals(minsn.owner)) {
+							String remap = remapped.get(minsn.name.concat(minsn.desc));
+							if (remap != null) minsn.name = remap;
+						}
+						break;
+					}
+
+					case AbstractInsnNode.INVOKE_DYNAMIC_INSN: {
+						InvokeDynamicInsnNode dinsn = (InvokeDynamicInsnNode) insn;
+
+						if (MethodComparison.isJavaLambdaMetafactory(dinsn.bsm)) {
+							Handle lambda = (Handle) dinsn.bsmArgs[1];
+							if (optifine.name.equals(lambda.getOwner())) {
+								String remap = remapped.get(lambda.getName().concat(lambda.getDesc()));
+								if (remap != null) dinsn.bsmArgs[1] = new Handle(lambda.getTag(), lambda.getOwner(), remap, lambda.getDesc(), lambda.isInterface());
+							}
+						}
+						break;
+					}
+					}
+				}
+			}
 			return apply(reader, vanilla, optifine, toCheck);			
 		}
 	}
