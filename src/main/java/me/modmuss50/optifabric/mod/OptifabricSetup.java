@@ -143,7 +143,7 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.now-playing.mixins.json");
 		}
 
-		if (isPresent("origins", mod -> compareVersions(Pattern.compile("^1\\.16(\\.\\d)?-").matcher(mod.getVersion().getFriendlyString()).find() ? ">=1.16-0.2.0" : ">=0.4.1", mod))) {
+		if (isPresent("origins", mod -> compareVersions(Pattern.compile("^1\\.16(\\.\\d)?-").matcher(mod.getVersion().getFriendlyString()).find() ? ">=1.16-0.2.0" : ">=0.4.1 <1.0", mod))) {
 			if (isPresent("origins", mod -> !Pattern.compile("^1\\.16(\\.\\d)?-").matcher(mod.getVersion().getFriendlyString()).find() || compareVersions(">=1.16.3-0.4.0", mod))) {
 				Mixins.addConfiguration("optifabric.compat.origins.mixins.json");
 			}
@@ -158,6 +158,10 @@ public class OptifabricSetup implements Runnable {
 					}
 				}
 			});
+		}
+
+		if (isPresent("apoli")) {
+			Mixins.addConfiguration("optifabric.compat.apoli.mixins.json");
 		}
 
 		if (isPresent("staffofbuilding")) {
