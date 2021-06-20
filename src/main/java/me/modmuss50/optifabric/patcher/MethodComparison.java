@@ -45,7 +45,7 @@ class MethodComparison {
 	}
 
 	MethodComparison(MethodNode original, MethodNode patched, boolean permissive) {
-		assert Objects.equals(original.name, patched.name);
+		assert Objects.equals(original.name, patched.name) || permissive;
 		assert Objects.equals(original.desc, patched.desc) || permissive;
 		node = patched;
 

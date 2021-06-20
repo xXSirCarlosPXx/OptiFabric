@@ -7,12 +7,14 @@
  */
 package me.modmuss50.optifabric.patcher;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -23,8 +25,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -33,23 +33,28 @@ import com.google.common.util.concurrent.Runnables;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.MappingResolver;
-import net.fabricmc.tinyremapper.IMappingProvider.MappingAcceptor;
-import net.fabricmc.tinyremapper.IMappingProvider.Member;
+import net.fabricmc.tinyremapper.IMappingProvider;
 
 import me.modmuss50.optifabric.util.ASMUtils;
 
-public class LambdaRebuilder {
+public class LambdaRebuilder implements IMappingProvider, Closeable {
 	private static final boolean ALLOW_VAGUE_EQUIVALENCE = !Boolean.getBoolean("optifabric.exactOnly");
-	private final File optifineFile;
-	private final File minecraftClientFile;
-	protected final Map<Member, Pair<String, String>> fixes = new HashMap<>();
+	private final JarFile minecraftClientFile;
+	private final Map<Member, String> fixes = new HashMap<>();
+	protected final Map<Member, Pair<String, String>> fuzzes = ALLOW_VAGUE_EQUIVALENCE ? new HashMap<>() : Collections.emptyMap();
 
 	public static void main(String... args) throws IOException {
 		if (args == null || args.length != 2) {
@@ -73,39 +78,49 @@ public class LambdaRebuilder {
 
 		LambdaRebuilder rebuilder = new LambdaRebuilder();
 		int unsolved = rebuilder.findLambdas(minecraft.name, minecraft.methods, patched.methods);
+		rebuilder.close(); //Done with it now
 
-		System.out.printf(unsolved == 0 ? "Fully matched up %d lambdas:%n" : "Partially matched %d/%d lambdas%n", rebuilder.fixes.size(), rebuilder.fixes.size() + unsolved);
-		for (Entry<Member, Pair<String, String>> entry : rebuilder.fixes.entrySet()) {
+		int total = rebuilder.fixes.size() + rebuilder.fuzzes.size();
+		System.out.printf(unsolved == 0 ? "Fully matched up %d lambdas:%n" : "Partially matched %d/%d lambdas%n", total, total + unsolved);
+		for (Entry<Member, String> entry : rebuilder.fixes.entrySet()) {
+			Member lambda = entry.getKey();
+			System.out.printf("\t%s#%s%s => %s%n", lambda.owner, lambda.name, lambda.desc, entry.getValue(), lambda.desc);
+		}
+		for (Entry<Member, Pair<String, String>> entry : rebuilder.fuzzes.entrySet()) {
 			Member lambda = entry.getKey();
 			Pair<String, String> remap = entry.getValue();
 			System.out.printf("\t%s#%s%s => %s%n", lambda.owner, lambda.name, lambda.desc, remap.getLeft(), remap.getRight());
 		}
 	}
 
-	protected LambdaRebuilder() {
-		minecraftClientFile = optifineFile = null;
+	private LambdaRebuilder() {
+		minecraftClientFile = null;
 	}
 
-	public LambdaRebuilder(File optifineFile, File minecraftClientFile) throws IOException {
-		this.optifineFile = optifineFile;
-		this.minecraftClientFile = minecraftClientFile;
+	public LambdaRebuilder(File minecraftClientFile) throws IOException {
+		this.minecraftClientFile = new JarFile(minecraftClientFile);
 	}
 
-	public void buildLambdaMap() throws IOException {
-		try (JarFile optifineJar = new JarFile(optifineFile); JarFile clientJar = new JarFile(minecraftClientFile)) {
-			Enumeration<JarEntry> entrys = optifineJar.entries();
+	public void findLambdas(ClassNode patched) throws IOException {
+		JarEntry entry = minecraftClientFile.getJarEntry(patched.name.concat(".class"));
+		if (entry == null) throw new IllegalArgumentException(patched.name.concat(" not present in vanilla"));
 
-			while (entrys.hasMoreElements()) {
-				JarEntry entry = entrys.nextElement();
-				String name = entry.getName();
+		ClassNode minecraftClass = ASMUtils.readClass(minecraftClientFile, entry);
+		findLambdas(minecraftClass, patched);
 
-				if (name.endsWith(".class") && !name.startsWith("net/") && !name.startsWith("optifine/") && !name.startsWith("javax/")) {
-					ClassNode classNode = ASMUtils.readClass(optifineJar, entry);
-					ClassNode minecraftClass = ASMUtils.readClass(clientJar, Objects.requireNonNull(clientJar.getJarEntry(name), name.concat(" not present in vanilla")));
+		if (!fuzzes.isEmpty()) {
+			Map<String, String> toCheck = new HashMap<>();
+			Map<String, Member> checkedLambdas = new HashMap<>();
 
-					findLambdas(minecraftClass, classNode);
-				}
-			}	
+			for (Entry<Member, Pair<String, String>> fuzz : fuzzes.entrySet()) {
+				Member lambda = fuzz.getKey();
+				Pair<String, String> remap = fuzz.getValue();
+
+				toCheck.put(lambda.name.concat(lambda.desc), remap.getLeft().concat(remap.getRight()));
+				checkedLambdas.put(lambda.name.concat(lambda.desc), lambda);
+			}
+
+			fix(toCheck, checkedLambdas, minecraftClass, patched);
 		}
 	}
 
@@ -185,6 +200,7 @@ public class LambdaRebuilder {
 						//They're not the same exact methods, but they might produce the same result in such a way that it doesn't matter (this ignores the case where equivalently looking lambdas are switched)
 						if (originalSplit != patchedSplit || !originalLambda.method.regionMatches(0, patchedLambda.method, 0, originalSplit) || !Type.getReturnType(originalLambda.method).equals(Type.getReturnType(patchedLambda.method))) break out;
 						//System.out.printf("Proposing fuzzing %s as %s, producing %s <= %s%n", patchedLambda.method, originalLambda.method, originalLambda.getFullName(), patchedLambda.getName());
+						if (!Objects.equals(originalLambda.owner, patchedLambda.owner)) break out; //They're not likely to be the same
 					}
 				}
 
@@ -290,44 +306,122 @@ public class LambdaRebuilder {
 			return false; //Don't add the fix if it is wrong
 		} else if (vague) {
 			System.out.printf("Fuzzing %s#%s%s as %s%s%n", className, from.name, from.desc, to.name, to.desc);
+
+			fuzzes.put(new Member(className, from.name, from.desc), Pair.of(to.name, to.desc));
+		} else {
+			fixes.put(new Member(className, from.name, from.desc), remapName(className, to.name, to.desc));
 		}
 
-		fixes.put(new Member(className, from.name, from.desc), Pair.of(to.name, to.desc));
-
-		from.name = to.name; //Apply the rename to the actual method node too
 		commonMethods.add(new MethodComparison(to, from, vague));
 		return true;
 	}
 
-	public Map<String, Map<String, String>> load(String from, MappingAcceptor out) {
-		MappingResolver mapper = FabricLoader.getInstance().getMappingResolver();
-		Map<String, Map<String, String>> fuzzes = ALLOW_VAGUE_EQUIVALENCE ? new HashMap<>() : Collections.emptyMap();
+	protected String remapName(String owner, String name, String desc) {
+		return FabricLoader.getInstance().getMappingResolver().mapMethodName("official", owner.replace('/', '.'), name, desc);
+	}
 
-		for (Entry<Member, Pair<String, String>> entry : fixes.entrySet()) {
+	@Override
+	public void load(MappingAcceptor out) {
+		fixes.forEach(out::acceptMethod);
+
+		for (Entry<Member, Pair<String, String>> entry : fuzzes.entrySet()) {
 			Member lambda = entry.getKey();
 			Pair<String, String> remap = entry.getValue();
 
-			String lambdaOwner = lambda.owner.replace('/', '.');
-			String vanilla = mapper.mapMethodName(from, lambdaOwner, remap.getLeft(), remap.getRight());
-			out.acceptMethod(lambda, vanilla);
+			out.acceptMethod(lambda, remapName(lambda.owner, remap.getLeft(), remap.getRight()));
+		}
+	}
 
-			if (!lambda.desc.equals(remap.getRight())) {
-				assert ALLOW_VAGUE_EQUIVALENCE;
-				fuzzes.computeIfAbsent(mapper.mapClassName(from, lambdaOwner).replace('.', '/'), k -> new HashMap<>()).put(map(mapper, from, vanilla, lambda.desc), map(mapper, from, vanilla, remap.getRight()));
+	private void fix(Map<String, String> toCheck, Map<String, Member> checkedLambdas, ClassNode minecraft, ClassNode optifine) {
+		Object2IntMap<String> memberToAccess = new Object2IntOpenHashMap<>(minecraft.methods.size());
+		memberToAccess.defaultReturnValue(-1);
+		for (MethodNode method : minecraft.methods) {
+			String key = method.name.concat(method.desc);
+			memberToAccess.put(key, method.access);
+		}
+
+		Map<String, String> staticFlip = new HashMap<>();
+		for (MethodNode method : optifine.methods) {
+			String key = method.name.concat(method.desc);
+
+			String remap = toCheck.get(key);
+			if (remap == null) continue;
+			int access = memberToAccess.getInt(remap);
+			if (access == -1) throw new IllegalStateException("Unable to find vanilla method " + minecraft.name + '#' + remap);
+
+			boolean shouldBeStatic = Modifier.isStatic(access);
+			if (Modifier.isStatic(method.access) != shouldBeStatic) {					
+				if (!shouldBeStatic) {//Become static, previously wasn't
+					if (Modifier.isPrivate(method.access)) {
+						Type[] args = Type.getArgumentTypes(method.desc);
+
+						if (args.length >= 1 && optifine.name.equals(args[0].getInternalName())) {//Could we fix it quickly?
+							staticFlip.put(method.name.concat(method.desc), Type.getMethodDescriptor(Type.getReturnType(method.desc), Arrays.copyOfRange(args, 1, args.length)));
+							continue;
+						}						
+					}
+
+					throw new UnsupportedOperationException("Method has become static: " + optifine.name + '#' + key);
+				} else {//No longer static, previously was
+					if (Modifier.isPrivate(method.access)) {//We'll add this as a parameter as we can fix all the uses
+						staticFlip.put(key, "(L" + optifine.name + ';' + method.desc.substring(1));
+						continue;
+					}
+
+					//More consequential fixes will be needed
+					throw new UnsupportedOperationException("Method is no longer static: " + optifine.name + '#' + key);
+				}
 			}
 		}
 
-		return fuzzes;
+		if (!staticFlip.isEmpty()) {
+			for (MethodNode method : optifine.methods) {
+				String newDesc = staticFlip.get(method.name.concat(method.desc));
+				if (newDesc != null) {
+					method.access ^= Modifier.STATIC;
+					Objects.requireNonNull(checkedLambdas.get(method.name.concat(method.desc)), "Failed to find lambda " + optifine.name + '#' + method.name + method.desc).desc = newDesc;
+					method.desc = newDesc;
+				}
+
+				for (AbstractInsnNode insn : method.instructions) {
+					switch (insn.getType()) {
+					case AbstractInsnNode.METHOD_INSN: {
+						MethodInsnNode minsn = (MethodInsnNode) insn;
+
+						if (optifine.name.equals(minsn.owner)) {
+							newDesc = staticFlip.get(minsn.name.concat(minsn.desc));
+							if (newDesc != null) {
+								minsn.setOpcode(minsn.getOpcode() == Opcodes.INVOKESTATIC ? Opcodes.INVOKEVIRTUAL : Opcodes.INVOKESTATIC);
+								minsn.desc = newDesc;
+							}
+						}
+						break;
+					}
+
+					case AbstractInsnNode.INVOKE_DYNAMIC_INSN: {
+						InvokeDynamicInsnNode dinsn = (InvokeDynamicInsnNode) insn;
+
+						if (MethodComparison.isJavaLambdaMetafactory(dinsn.bsm)) {
+							Handle lambda = (Handle) dinsn.bsmArgs[1];
+
+							if (optifine.name.equals(lambda.getOwner())) {
+								newDesc = staticFlip.get(lambda.getName().concat(lambda.getDesc()));
+								if (newDesc != null) {
+									dinsn.bsmArgs[1] = new Handle(lambda.getTag() == Opcodes.H_INVOKESTATIC ? Opcodes.H_INVOKEVIRTUAL : Opcodes.H_INVOKESTATIC,
+											lambda.getOwner(), lambda.getName(), newDesc, lambda.isInterface());	
+								}
+							}
+						}
+						break;
+					}
+					}
+				}
+			}
+		}
 	}
 
-	private static String map(MappingResolver mapper, String from, String name, String desc) {
-		StringBuffer buf = new StringBuffer(name);
-
-		Matcher matcher = Pattern.compile("L([^;/]+?);").matcher(desc);
-		while (matcher.find()) {
-			matcher.appendReplacement(buf, Matcher.quoteReplacement('L' + mapper.mapClassName(from, matcher.group(1).replace('/', '.')).replace('.', '/') + ';'));
-		}
-
-		return matcher.appendTail(buf).toString();
+	@Override
+	public void close() throws IOException {
+		if (minecraftClientFile != null) minecraftClientFile.close();
 	}
 }

@@ -5,8 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
@@ -22,7 +22,7 @@ public class ASMUtils {
 		}
 	}
 
-	public static ClassNode readClass(JarFile jar, JarEntry entry) throws IOException {
+	public static ClassNode readClass(ZipFile jar, ZipEntry entry) throws IOException {
 		try (InputStream in = jar.getInputStream(entry)) {
 			return readClass(new ClassReader(Objects.requireNonNull(in, "Entry not present in jar")));
 		}

@@ -1,5 +1,6 @@
 package me.modmuss50.optifabric.mod;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipError;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -24,6 +26,9 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
+
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.launch.common.FabricLauncherBase;
@@ -42,9 +47,9 @@ import net.fabricmc.tinyremapper.OutputConsumerPath.Builder;
 import me.modmuss50.optifabric.mod.OptifineVersion.JarType;
 import me.modmuss50.optifabric.patcher.ClassCache;
 import me.modmuss50.optifabric.patcher.LambdaRebuilder;
-import me.modmuss50.optifabric.patcher.StaticFuzzer;
-import me.modmuss50.optifabric.util.ThrowingFunction;
+import me.modmuss50.optifabric.util.ASMUtils;
 import me.modmuss50.optifabric.util.ZipUtils;
+import me.modmuss50.optifabric.util.ZipUtils.ZipTransformer;
 
 public class OptifineSetup {
 	public static Pair<File, ClassCache> getRuntime() throws IOException {
@@ -115,32 +120,50 @@ public class OptifineSetup {
 
 		//A jar without srgs
 		File jarOfTheFree = new File(versionDir, "Optifine-jarofthefree.jar");
+		LambdaRebuilder rebuilder = new LambdaRebuilder(minecraftJar.toFile());
 
 		System.out.println("De-Volderfiying jar");
 
 		//Find all the SRG named classes and remove them
-		ZipUtils.transform(optifineModJar, (zip, zipEntry) -> {
-			String name = zipEntry.getName();
+		ZipUtils.transform(optifineModJar, new ZipTransformer() {
+			private boolean keep(String name) {
+				if (name.startsWith("com/mojang/blaze3d/platform/")) {
+					int split = name.indexOf('$');
 
-			if (name.startsWith("com/mojang/blaze3d/platform/")) {
-				int split = name.indexOf('$');
+					//Keep the class if not of the form com/mojang/blaze3d/platform/MojangName$InnerVoldeName.class
+					return split <= 0 || name.length() - split <= 8;
+				}
 
-				//Keep the class if not of the form com/mojang/blaze3d/platform/MojangName$InnerVoldeName.class
-				return split <= 0 || name.length() - split <= 8;
+				return !(name.startsWith("srg/") || name.startsWith("net/minecraft/"));
 			}
 
-			return !(name.startsWith("srg/") || name.startsWith("net/minecraft/"));
-		}, jarOfTheFree);
+			@Override
+			public InputStream apply(ZipFile zip, ZipEntry entry) throws IOException {
+				String name = entry.getName();
 
-		System.out.println("Finding lambdas to fix");
-		LambdaRebuilder rebuilder = new LambdaRebuilder(jarOfTheFree, minecraftJar.toFile());
-		rebuilder.buildLambdaMap();
-		RetainingMappingsProvider lambdas = new RetainingMappingsProvider();
-		Map<String, Map<String, String>> fuzzes = rebuilder.load("official", lambdas);
+				if (keep(name)) {
+					if (name.endsWith(".class") && !name.startsWith("net/") && !name.startsWith("optifine/") && !name.startsWith("javax/")) {
+						//System.out.println("Finding lambdas to fix in ".concat(name));
+						ClassNode node = ASMUtils.readClass(zip, entry);
+
+						rebuilder.findLambdas(node);
+
+						ClassWriter writer = new ClassWriter(0);
+						node.accept(writer);
+						return new ByteArrayInputStream(writer.toByteArray());
+					} else {
+						return zip.getInputStream(entry);
+					}
+				} else {
+					return null;
+				}
+			}
+		}, jarOfTheFree);
+		rebuilder.close();
 
 		String namespace = FabricLoader.getInstance().getMappingResolver().getCurrentRuntimeNamespace();
 		System.out.println("Remapping optifine from official to " + namespace);
-		remapOptifine(jarOfTheFree, getLibs(minecraftJar), remappedJar, createMappings("official", namespace, lambdas));
+		remapOptifine(jarOfTheFree, getLibs(minecraftJar), remappedJar, createMappings("official", namespace, rebuilder));
 
 		//We are done, lets get rid of the stuff we no longer need
 		jarOfTheFree.delete();
@@ -158,9 +181,7 @@ public class OptifineSetup {
 			ZipUtils.extract(remappedJar, optifineClasses);
 		}
 
-		try (StaticFuzzer transformer = !fuzzes.isEmpty() ? new StaticFuzzer(fuzzes) : null) {
-			return Pair.of(remappedJar, generateClassCache(remappedJar, fuzzes.isEmpty() ? IOUtils::toByteArray : transformer, optifinePatches, modHash, extract));
-		}
+		return Pair.of(remappedJar, generateClassCache(remappedJar, optifinePatches, modHash, extract));
 	}
 
 	private static void runInstaller(File installer, File output, File minecraftJar) throws IOException {
@@ -308,7 +329,7 @@ public class OptifineSetup {
 		return contextJars.get(0);
 	}
 
-	private static ClassCache generateClassCache(File from, ThrowingFunction<InputStream, byte[], IOException> transformer, File to, byte[] hash, boolean extractClasses) throws IOException {
+	private static ClassCache generateClassCache(File from, File to, byte[] hash, boolean extractClasses) throws IOException {
 		File classesDir = new File(to.getParent(), "classes");
 		if (extractClasses) {
 			if (classesDir.exists()) {
@@ -319,12 +340,12 @@ public class OptifineSetup {
 		}
 		ClassCache classCache = new ClassCache(hash);
 
-		ZipUtils.transformInPlace(from, (jarFile, entry) -> {
+		ZipUtils.filterInPlace(from, (jarFile, entry) -> {
 			String name = entry.getName();
 
 			if ((name.startsWith("net/minecraft/") || name.startsWith("com/mojang/")) && name.endsWith(".class")) {
 				try (InputStream in = jarFile.getInputStream(entry)) {
-					byte[] bytes = transformer.apply(in);
+					byte[] bytes = IOUtils.toByteArray(in);
 
 					classCache.addClass(name.substring(0, name.length() - 6), bytes);
 					if (extractClasses) {
