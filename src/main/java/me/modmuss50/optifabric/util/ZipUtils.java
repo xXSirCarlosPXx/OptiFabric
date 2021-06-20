@@ -121,6 +121,7 @@ public class ZipUtils {
 			tempZip = File.createTempFile("optifabric", ".zip");
 
 			transform(zip, ZipFile.OPEN_READ | ZipFile.OPEN_DELETE, transformer, tempZip);
+			zip.delete(); //Make sure it's definitely out of the way
 
 			FileUtils.moveFile(tempZip, zip);
 		} catch (IOException e) {
