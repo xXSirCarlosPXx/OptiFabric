@@ -20,7 +20,7 @@ import me.modmuss50.optifabric.compat.PlacatingSurrogate;
 import me.modmuss50.optifabric.compat.Shim;
 
 @Mixin(SpriteAtlasTexture.class)
-@InterceptingMixin("svenhjol/charm/mixin/SpriteAtlasTextureMixin")
+@InterceptingMixin("svenhjol/charm/mixin/callback/StitchTextureCallbackMixin")
 class SpriteAtlasTextureMixin {
 	@PlacatingSurrogate
 	private void hookStitch(ResourceManager resourceManager, Stream<Identifier> idStream, Profiler profiler, int mipmapLevel, CallbackInfoReturnable<Data> call, int mipmapLevels) {

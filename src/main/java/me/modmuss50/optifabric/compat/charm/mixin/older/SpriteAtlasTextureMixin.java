@@ -1,4 +1,4 @@
-package me.modmuss50.optifabric.compat.charm.mixin.old;
+package me.modmuss50.optifabric.compat.charm.mixin.older;
 
 import java.util.Set;
 import java.util.stream.Stream;
@@ -20,7 +20,7 @@ import me.modmuss50.optifabric.compat.PlacatingSurrogate;
 import me.modmuss50.optifabric.compat.Shim;
 
 @Mixin(SpriteAtlasTexture.class)
-@InterceptingMixin("svenhjol/charm/mixin/SpriteAtlasTextureMixin")
+@InterceptingMixin("svenhjol/meson/mixin/SpriteAtlasTextureMixin")
 class SpriteAtlasTextureMixin {
 	@PlacatingSurrogate
 	private void hookStitch(ResourceManager resourceManager, Stream<Identifier> idStream, Profiler profiler, int mipmapLevel, CallbackInfoReturnable<Data> call, int mipmapLevels) {
