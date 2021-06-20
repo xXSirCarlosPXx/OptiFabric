@@ -20,6 +20,23 @@ import me.modmuss50.optifabric.compat.InterceptingMixinPlugin;
 import me.modmuss50.optifabric.util.RemappingUtils;
 
 public class OriginsMixinPlugin extends InterceptingMixinPlugin {
+	protected void addFocusedEntity(InsnList extra, Member getFocusedEntity) {
+		extra.add(new InsnNode(Opcodes.ACONST_NULL));
+		extra.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, getFocusedEntity.owner, getFocusedEntity.name, getFocusedEntity.desc, false));
+	}
+
+	protected String fogStart() {
+		return "fogStart";
+	}
+
+	protected String fogEnd() {
+		return "fogEnd";
+	}
+
+	protected Member getElytraMixinTarget() {//ItemStack, getItem, ()Item
+		return RemappingUtils.mapMethod("class_1799", "method_7909", "()Lnet/minecraft/class_1792;");
+	}
+
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
 		switch (mixinInfo.getName()) {
@@ -40,8 +57,7 @@ public class OriginsMixinPlugin extends InterceptingMixinPlugin {
 						extra.add(new JumpInsnNode(Opcodes.GOTO, skip));
 						extra.add(fakeStart);
 						extra.add(new VarInsnNode(Opcodes.DLOAD, 5));
-						extra.add(new InsnNode(Opcodes.ACONST_NULL));
-						extra.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, getFocusedEntity.owner, getFocusedEntity.name, getFocusedEntity.desc, false));
+						addFocusedEntity(extra, getFocusedEntity);
 						extra.add(new InsnNode(Opcodes.POP2));
 						extra.add(skip);
 
@@ -53,9 +69,9 @@ public class OriginsMixinPlugin extends InterceptingMixinPlugin {
 						InsnList extra = new InsnList();
 						extra.add(new JumpInsnNode(Opcodes.GOTO, skip));
 						extra.add(new InsnNode(Opcodes.FCONST_0));
-						extra.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/mojang/blaze3d/systems/RenderSystem", "fogStart", "(F)V", false));
+						extra.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/mojang/blaze3d/systems/RenderSystem", fogStart(), "(F)V", false));
 						extra.add(new InsnNode(Opcodes.FCONST_1));
-						extra.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/mojang/blaze3d/systems/RenderSystem", "fogEnd", "(F)V", false));
+						extra.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/mojang/blaze3d/systems/RenderSystem", fogEnd(), "(F)V", false));
 						extra.add(new InsnNode(Opcodes.FCONST_1));
 						extra.add(new InsnNode(Opcodes.POP));
 						extra.add(new LdcInsnNode(0.25F));
@@ -69,20 +85,20 @@ public class OriginsMixinPlugin extends InterceptingMixinPlugin {
 				break;
 			}
 
-			case "ElytraFeatureRendererMixin": {//ItemStack, getItem, ()ItemStack
-				Member getItem = RemappingUtils.mapMethod("class_1799", "method_7909", "()Lnet/minecraft/class_1792;");
+			case "ElytraFeatureRendererMixin": {
 				//ElytraFeatureRenderer, render, (MatrixStack, VertexConsumerProvider, LivingEntity)
 				String render = RemappingUtils.getMethodName("class_979", "method_17161",
 						"(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;ILnet/minecraft/class_1309;FFFFFF)V");
 
 				for (MethodNode method : targetClass.methods) {
 					if (render.equals(method.name)) {//Origins does this to all methods called render
+						Member target = getElytraMixinTarget();
 						LabelNode skip = new LabelNode();
 
 						InsnList extra = new InsnList();
 						extra.add(new JumpInsnNode(Opcodes.GOTO, skip));
 						extra.add(new InsnNode(Opcodes.ACONST_NULL));
-						extra.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, getItem.owner, getItem.name, getItem.desc, false));
+						extra.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, target.owner, target.name, target.desc, false));
 						extra.add(new InsnNode(Opcodes.POP));
 						extra.add(skip);
 

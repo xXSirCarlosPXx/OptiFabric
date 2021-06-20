@@ -17,7 +17,7 @@ import me.modmuss50.optifabric.compat.Shim;
 @Mixin(BackgroundRenderer.class)
 @InterceptingMixin("io/github/apace100/apoli/mixin/BackgroundRendererMixin")
 abstract class BackgroundRendererMixin {
-	@ModifyVariable(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;getFocusedEntity()Lnet/minecraft/entity/Entity;", ordinal = 3), ordinal = 0)
+	@ModifyVariable(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;getFocusedEntity()Lnet/minecraft/entity/Entity;", ordinal = 5), ordinal = 0)
     private static double optifabric_modifyD(double original, Camera camera) {
 		return modifyD(original, camera);
 	}
@@ -25,12 +25,12 @@ abstract class BackgroundRendererMixin {
 	@Shim
 	private static native double modifyD(double original, Camera camera);
 
-	@Redirect(method = "setupFog", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;fogStart(F)V", remap = false), remap = false)
+	@Redirect(method = "setupFog", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderFogStart(F)V", remap = false), remap = false)
 	private static void optifabric_redirectFogStart(float start, Camera camera, FogType fogType) {
 		redirectFogStart(start, camera, fogType);
 	}
 
-	@Redirect(method = "setupFog", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;fogEnd(F)V", remap = false), remap = false)
+	@Redirect(method = "setupFog", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderFogEnd(F)V", remap = false), remap = false)
 	private static void optifabric_redirectFogEnd(float end, Camera camera, FogType fogType) {
 		redirectFogEnd(end, camera, fogType);
 	}

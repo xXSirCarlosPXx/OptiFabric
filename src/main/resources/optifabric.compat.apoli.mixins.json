@@ -1,7 +1,7 @@
 {
 	"parent": "optifabric.mixins.json",
 	"package": "me.modmuss50.optifabric.compat.apoli.mixin",
-	"plugin": "me.modmuss50.optifabric.compat.origins.OriginsMixinPlugin",
+	"plugin": "me.modmuss50.optifabric.compat.apoli.ApoliMixinPlugin",
 	"mixins": [
 		"BackgroundRendererMixin",
 		"ElytraFeatureRendererMixin"
