@@ -81,4 +81,9 @@ public class StaticFuzzer extends LambdaRebuilder {
 			return writer.toByteArray();
 		}
 	}
+
+	@Override
+	protected String remapName(String owner, String name, String desc) {
+		return name;
+	}
 }

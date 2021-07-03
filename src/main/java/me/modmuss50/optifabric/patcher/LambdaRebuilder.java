@@ -76,7 +76,12 @@ public class LambdaRebuilder implements IMappingProvider, Closeable {
 		ClassNode minecraft = ASMUtils.readClass(vanilla);
 		ClassNode patched = ASMUtils.readClass(optifine);
 
-		LambdaRebuilder rebuilder = new LambdaRebuilder();
+		LambdaRebuilder rebuilder = new LambdaRebuilder() {
+			@Override
+			protected String remapName(String owner, String name, String desc) {
+				return name;
+			}
+		};
 		int unsolved = rebuilder.findLambdas(minecraft.name, minecraft.methods, patched.methods);
 		rebuilder.close(); //Done with it now
 
@@ -84,12 +89,12 @@ public class LambdaRebuilder implements IMappingProvider, Closeable {
 		System.out.printf(unsolved == 0 ? "Fully matched up %d lambdas:%n" : "Partially matched %d/%d lambdas%n", total, total + unsolved);
 		for (Entry<Member, String> entry : rebuilder.fixes.entrySet()) {
 			Member lambda = entry.getKey();
-			System.out.printf("\t%s#%s%s => %s%n", lambda.owner, lambda.name, lambda.desc, entry.getValue(), lambda.desc);
+			System.out.printf("\t%s#%s%s => %s%s%n", lambda.owner, lambda.name, lambda.desc, entry.getValue(), lambda.desc);
 		}
 		for (Entry<Member, Pair<String, String>> entry : rebuilder.fuzzes.entrySet()) {
 			Member lambda = entry.getKey();
 			Pair<String, String> remap = entry.getValue();
-			System.out.printf("\t%s#%s%s => %s%n", lambda.owner, lambda.name, lambda.desc, remap.getLeft(), remap.getRight());
+			System.out.printf("\t%s#%s%s => %s%s%n", lambda.owner, lambda.name, lambda.desc, remap.getLeft(), remap.getRight());
 		}
 	}
 
@@ -312,7 +317,7 @@ public class LambdaRebuilder implements IMappingProvider, Closeable {
 			fixes.put(new Member(className, from.name, from.desc), remapName(className, to.name, to.desc));
 		}
 
-		commonMethods.add(new MethodComparison(to, from, vague));
+		commonMethods.add(new MethodComparison(to, from, true));
 		return true;
 	}
 
