@@ -320,7 +320,20 @@ public class OptifabricSetup implements Runnable {
 		}
 
 		if (isPresent("stacc")) {
-			Mixins.addConfiguration("optifabric.compat.stacc.mixins.json");
+			injector.predictFuture(RemappingUtils.getClassName("class_2540")).ifPresent(node -> {//PacketByteBuf
+				String desc = RemappingUtils.mapMethodDescriptor("(Lnet/minecraft/class_1799;Z)Lnet/minecraft/class_2540;"); //(ItemStack)PacketByteBuf
+
+				for (MethodNode method : node.methods) {
+					if ("writeItemStack".equals(method.name) && desc.equals(method.desc)) {
+						if (isPresent("stacc", ">=1.2")) {
+							Mixins.addConfiguration("optifabric.compat.stacc.mixins.json");
+						} else {
+							Mixins.addConfiguration("optifabric.compat.stacc.old-mixins.json");
+						}
+						break;
+					}
+				}
+			});
 		}
 
 		if (isPresent("bannerpp")) {
