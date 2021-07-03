@@ -41,12 +41,12 @@ abstract class BackgroundRendererMixin {
 	@Shim
 	private static native void redirectFogEnd(float end, Camera camera, FogType fogType);
 
-	@ModifyConstant(method = "setupFog", constant = @Constant(floatValue = 0.25F, ordinal = 0), remap = false)
+	@ModifyConstant(method = "setupFog", constant = @Constant(floatValue = 0.25F, ordinal = 1), remap = false)
 	private static float optifabric_modifyLavaVisibilitySNoPotion(float original, Camera camera) {
 		return modifyLavaVisibilitySNoPotion(original, camera);
 	}
 
-	@ModifyConstant(method = "setupFog", constant = @Constant(floatValue = 1F, ordinal = 1), remap = false)
+	@ModifyConstant(method = "setupFog", constant = @Constant(floatValue = 1F, ordinal = 0), remap = false)
 	private static float optifabric_modifyLavaVisibilityVNoPotion(float original, Camera camera) {
 		return modifyLavaVisibilityVNoPotion(original, camera);
 	}
