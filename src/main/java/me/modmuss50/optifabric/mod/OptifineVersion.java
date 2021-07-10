@@ -37,7 +37,7 @@ public class OptifineVersion {
 			File optifineJar = null;
 
 			for (File file : mods) {
-				if (!file.isDirectory() && "jar".equals(FilenameUtils.getExtension(file.getName()))) {
+				if (!file.isDirectory() && "jar".equals(FilenameUtils.getExtension(file.getName())) && !file.getName().startsWith(".") && !file.isHidden()) {
 					JarType type = getJarType(file);
 					if (type.isError()) {
 						jarType = type;
