@@ -1,8 +1,10 @@
 package me.modmuss50.optifabric.compat;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
@@ -28,6 +30,10 @@ import me.modmuss50.optifabric.util.MixinFinder.Mixin;
 import me.modmuss50.optifabric.util.RemappingUtils;
 
 public class InterceptingMixinPlugin extends EmptyMixinPlugin {
+	private @interface From {
+		String method();
+	}
+
 	/*@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		try {
@@ -54,6 +60,7 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 			if (surrogateNode != null) {
 				for (Method realMethod : interceptionMixin.getMethods()) {
 					if (realMethod.getOriginalName().equals(method.name)) {
+						Annotations.setInvisible(method, From.class, "method", method.name.concat(method.desc));
 						method.name = realMethod.getName(); //Mangle name to whatever Mixin is using for the real injection
 						method.invisibleAnnotations.remove(surrogateNode);
 						Annotations.setVisible(method, Surrogate.class);
@@ -127,12 +134,27 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 		}));
 		if (shims.isEmpty()) return; //Nothing to do
 
+		Map<String, Consumer<MethodNode>> surrogates = new HashMap<>();
 		targetClassName = targetClassName.replace('.', '/');
+
 		for (Iterator<MethodNode> it = targetClass.methods.iterator(); it.hasNext();) {
 			MethodNode method = it.next();
 
-			if (shims.containsKey(method.name.concat(method.desc)) || Annotations.getInvisible(method, PlacatingSurrogate.class) != null) {
+			AnnotationNode from;
+			if (shims.containsKey(method.name.concat(method.desc))) {
 				it.remove(); //Don't want to keep the shim methods
+			} else if ((from = Annotations.getInvisible(method, From.class)) != null) {
+				String origin = Annotations.getValue(from, "method");
+
+				Consumer<MethodNode> copier = surrogates.remove(origin);
+				if (copier != null) {
+					copier.accept(method);
+				} else {
+					surrogates.put(origin, placatingSurrogate -> {
+						method.instructions = placatingSurrogate.instructions;
+						method.invisibleAnnotations.remove(from);
+					});
+				}
 			} else {
 				method.desc = StringUtils.replace(method.desc, "Lnull;", "Ljava/lang/Object;");
 
@@ -170,6 +192,21 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 								methodInsn.desc = replacedMethod.getDesc();
 							}
 						}
+					}
+				}
+
+				if (Annotations.getInvisible(method, PlacatingSurrogate.class) != null) {
+					it.remove(); //Don't actually need the method itself, just its contents
+					String origin = method.name.concat(method.desc);
+
+					Consumer<MethodNode> copier = surrogates.remove(origin);
+					if (copier != null) {
+						copier.accept(method);
+					} else {
+						surrogates.put(origin, realSurrogate -> {
+							realSurrogate.instructions = method.instructions;
+							realSurrogate.invisibleAnnotations.remove(Annotations.getInvisible(realSurrogate, From.class));
+						});
 					}
 				}
 			}

@@ -339,6 +339,14 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("bannerpp")) {
 			Mixins.addConfiguration("optifabric.compat.bannerpp.mixins.json");
 		}
+
+		if (isPresent("replaymod")) {
+			if (isPresent("minecraft", "1.17.x")) {
+				Mixins.addConfiguration("optifabric.compat.replaymod.new-mixins.json");
+			} else {
+				Mixins.addConfiguration("optifabric.compat.replaymod.mixins.json");
+			}
+		}
 	}
 
 	private static boolean isPresent(String modID) {
