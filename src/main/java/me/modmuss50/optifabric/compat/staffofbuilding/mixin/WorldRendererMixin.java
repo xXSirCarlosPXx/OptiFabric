@@ -30,7 +30,7 @@ abstract class WorldRendererMixin {
 	}
 
 	@Inject(method = "render", 
-			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;pushMatrix()V", ordinal = 0), 
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/util/hit/HitResult;getType()Lnet/minecraft/util/hit/HitResult$Type;"), 
 			locals = LocalCapture.CAPTURE_FAILHARD
 	)
 	private void renderWandHighlight(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f projectionMatrix,
