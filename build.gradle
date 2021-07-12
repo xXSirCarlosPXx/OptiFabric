@@ -40,7 +40,7 @@ repositories {
 	maven { url 'http://modmaven.k-4u.nl/artifactory/local-releases/' }
 	maven { url 'https://mod-buildcraft.com/maven' }
 	maven { url 'https://maven.dblsaiko.net' }
-	maven { url 'https://maven.terraformersmc.com/' }
+	maven { url 'https://maven.kotlindiscord.com/repository/terraformers/' } //Formerly https://maven.terraformersmc.com
 	maven { url 'https://www.cursemaven.com' }
 	maven { url 'https://jitpack.io' }
 }
