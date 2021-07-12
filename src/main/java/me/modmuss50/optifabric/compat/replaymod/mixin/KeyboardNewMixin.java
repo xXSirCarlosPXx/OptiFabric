@@ -34,7 +34,7 @@ abstract class KeyboardNewMixin {
 	private static native void charTyped(Element element, int keyChar, int modifiers, CallbackInfo call);
 
 	@PlacatingSurrogate
-	private void charTyped(Keyboard self, int keyChar, int modifiers, Element element, CallbackInfo call) {
+	private static void charTyped(Keyboard self, int keyChar, int modifiers, Element element, CallbackInfo call) {
 		charTyped(element, keyChar, modifiers, call);
 	}
 
@@ -42,7 +42,7 @@ abstract class KeyboardNewMixin {
 	private static native void charTyped(Element element, char keyChar, int modifiers, CallbackInfo call);
 
 	@PlacatingSurrogate
-	private void charTyped(Keyboard self, char keyChar, int modifiers, Element element, CallbackInfo call) {
+	private static void charTyped(Keyboard self, char keyChar, int modifiers, Element element, CallbackInfo call) {
 		charTyped(element, keyChar, modifiers, call);
 	}
 }

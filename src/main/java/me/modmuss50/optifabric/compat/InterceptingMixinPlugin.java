@@ -1,5 +1,6 @@
 package me.modmuss50.optifabric.compat;
 
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -68,6 +69,7 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 						String coercedDesc = coerceDesc(method);
 						if (coercedDesc != null) method.desc = coercedDesc;
 
+						assert Modifier.isStatic(method.access) == realMethod.isStatic();
 						targetClass.methods.add(method);
 						continue on;
 					}
@@ -130,6 +132,7 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 			}
 
 			assert method.name.equals(realMethod.getOriginalName());
+			assert Modifier.isStatic(method.access) == realMethod.isStatic();
 			return realMethod;
 		}));
 		if (shims.isEmpty()) return; //Nothing to do
