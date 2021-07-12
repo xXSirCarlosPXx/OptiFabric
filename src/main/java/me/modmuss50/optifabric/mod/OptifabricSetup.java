@@ -315,7 +315,7 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.cullparticles.mixins.json");
 		}
 
-		if (isPresent("the_aether")) {
+		if (isPresent("the_aether", "<1.17.1-1.5.0")) {
 			Mixins.addConfiguration("optifabric.compat.aether.mixins.json");
 		}
 
