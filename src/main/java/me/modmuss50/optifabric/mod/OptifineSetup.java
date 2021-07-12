@@ -223,6 +223,7 @@ public class OptifineSetup {
 		TinyTree normalMappings = FabricLauncherBase.getLauncher().getMappingConfiguration().getMappings();
 
 		Map<String, ClassDef> nameToClass = normalMappings.getClasses().stream().collect(Collectors.toMap(clazz -> clazz.getName("intermediary"), Function.identity()));
+		Map<Member, String> extraMethods = new HashMap<>();
 		Map<Member, String> extraFields = new HashMap<>();
 
 		ClassDef rebuildTask = nameToClass.get("net/minecraft/class_846$class_851$class_4578");
@@ -248,12 +249,22 @@ public class OptifineSetup {
 
 			ClassDef worldRenderer = nameToClass.get("net/minecraft/class_761");
 			extraFields.put(new Member(worldRenderer.getName(from), "renderDistance", "I"), "renderDistance_OF");
+
+			ClassDef threadExecutor = nameToClass.get("net/minecraft/class_1255");
+			extraMethods.put(new Member(threadExecutor.getName(from), "getTaskCount", "()I"), "getTaskCount_OF");
+
+			ClassDef vertexBuffer = nameToClass.get("net/minecraft/class_291");
+			extraFields.put(new Member(vertexBuffer.getName(from), "vertexCount", "I"), "vertexCount_OF");
+
+			String modelPart = nameToClass.get("net/minecraft/class_630").getName(from);
+			extraMethods.put(new Member(modelPart, "getChild", "(Ljava/lang/String;)L" + modelPart + ';'), "getChild_OF");
 		}
 
 		//In prod
 		return (out) -> {
 			TinyRemapperMappingsHelper.create(normalMappings, from, to).load(out);
 
+			extraMethods.forEach(out::acceptMethod);
 			extraFields.forEach(out::acceptField);
 
 			extra.load(out);
