@@ -24,7 +24,7 @@ import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 
 @Mixin(BlockModelRenderer.class)
 abstract class BlockModelRendererMixin {
-	@Inject(method = "renderModel", remap = false, locals = LocalCapture.CAPTURE_FAILSOFT,
+	@Inject(method = {"renderModel", "tesselateBlock"}, remap = false, locals = LocalCapture.CAPTURE_FAILSOFT,
 			at = @At(value = "INVOKE_ASSIGN", remap = true,
 					target = "Lnet/minecraft/util/crash/CrashReportSection;add(Ljava/lang/String;Ljava/lang/Object;)Lnet/minecraft/util/crash/CrashReportSection;"))
 	private void addInfo(BlockRenderView world, BakedModel model, BlockState state, BlockPos pos, MatrixStack matrix, VertexConsumer vertexConsumer, boolean cull,

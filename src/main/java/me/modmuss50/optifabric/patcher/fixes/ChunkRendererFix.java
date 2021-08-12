@@ -21,7 +21,7 @@ public class ChunkRendererFix implements ClassFixer {
 					MethodInsnNode methodInsnNode = (MethodInsnNode) insnNode;
 
 					if (methodInsnNode.getOpcode() == Opcodes.INVOKEVIRTUAL) {
-						if ("renderModel".equals(methodInsnNode.name)) {
+						if ("renderModel".equals(methodInsnNode.name) || "renderBatched".equals(methodInsnNode.name)) {
 							/* For reference:
 
 							class_2680 - net/minecraft/block/BlockState

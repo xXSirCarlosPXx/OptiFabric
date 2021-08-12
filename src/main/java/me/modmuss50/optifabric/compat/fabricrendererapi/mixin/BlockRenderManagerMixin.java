@@ -21,7 +21,7 @@ import net.minecraft.world.BlockRenderView;
 
 @Mixin(BlockRenderManager.class)
 abstract class BlockRenderManagerMixin {
-	@Inject(method = "renderModel", remap = false, locals = LocalCapture.CAPTURE_FAILSOFT,
+	@Inject(method = {"renderModel", "renderBatched"}, remap = false, locals = LocalCapture.CAPTURE_FAILSOFT,
 			at = {@At(value = "INVOKE", shift = Shift.AFTER, remap = true,
 					target = "Lnet/minecraft/util/crash/CrashReportSection;addBlockInfo(Lnet/minecraft/util/crash/CrashReportSection;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"),
 					@At(value = "INVOKE", shift = Shift.AFTER, remap = true,

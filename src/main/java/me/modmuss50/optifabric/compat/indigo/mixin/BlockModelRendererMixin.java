@@ -26,7 +26,7 @@ import me.modmuss50.optifabric.compat.Shim;
 @InterceptingMixin("net/fabricmc/fabric/mixin/client/indigo/renderer/MixinBlockModelRenderer")
 abstract class BlockModelRendererMixin {
 	@Inject(at = @At("HEAD"),
-			method = "renderModel(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/client/render/model/BakedModel;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;ZLjava/util/Random;JILnet/minecraftforge/client/model/data/IModelData;)Z",
+			method = {"renderModel", "tesselateBlock"}, remap = false,
 			cancellable = true)
 	private void hookRender(BlockRenderView blockView, BakedModel model, BlockState state, BlockPos pos, MatrixStack matrix, VertexConsumer buffer, boolean checkSides, Random rand, long seed, int overlay, @Coerce Object modelData, CallbackInfoReturnable<Boolean> call) {
 		hookRender(blockView, model, state, pos, matrix, buffer, checkSides, rand, seed, overlay, call);
