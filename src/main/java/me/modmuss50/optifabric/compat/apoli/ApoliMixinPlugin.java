@@ -1,8 +1,10 @@
 package me.modmuss50.optifabric.compat.apoli;
 
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import net.fabricmc.tinyremapper.IMappingProvider.Member;
@@ -28,6 +30,11 @@ public class ApoliMixinPlugin extends OriginsMixinPlugin {
 	@Override
 	protected String fogEnd() {
 		return "setShaderFogEnd";
+	}
+
+	@Override
+	protected AbstractInsnNode getFogTarget() {
+		return new LdcInsnNode(0.25F);
 	}
 
 	@Override

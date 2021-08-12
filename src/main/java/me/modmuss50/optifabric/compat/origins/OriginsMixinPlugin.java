@@ -1,6 +1,7 @@
 package me.modmuss50.optifabric.compat.origins;
 
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -31,6 +32,10 @@ public class OriginsMixinPlugin extends InterceptingMixinPlugin {
 
 	protected String fogEnd() {
 		return "fogEnd";
+	}
+
+	protected AbstractInsnNode getFogTarget() {
+		return new InsnNode(Opcodes.FCONST_1);
 	}
 
 	protected Member getElytraMixinTarget() {//ItemStack, getItem, ()Item
@@ -72,7 +77,7 @@ public class OriginsMixinPlugin extends InterceptingMixinPlugin {
 						extra.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/mojang/blaze3d/systems/RenderSystem", fogStart(), "(F)V", false));
 						extra.add(new InsnNode(Opcodes.FCONST_1));
 						extra.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/mojang/blaze3d/systems/RenderSystem", fogEnd(), "(F)V", false));
-						extra.add(new InsnNode(Opcodes.FCONST_1));
+						extra.add(getFogTarget());
 						extra.add(new InsnNode(Opcodes.POP));
 						extra.add(new LdcInsnNode(0.25F));
 						extra.add(new LdcInsnNode(3F));
