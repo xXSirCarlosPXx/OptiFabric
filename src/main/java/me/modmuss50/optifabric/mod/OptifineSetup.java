@@ -329,7 +329,14 @@ public class OptifineSetup {
 				Path parent = minecraftJar.getParent().resolveSibling(String.format("minecraft-%s-client.jar", OptifineVersion.minecraftVersion));
 
 				if (Files.notExists(parent)) {
-					throw new AssertionError("Unable to find Minecraft dev jar! Tried " + officialNames + " and " + parent);
+					Path alternativeParent = parent.resolveSibling("minecraft-client.jar");
+
+					if (Files.notExists(alternativeParent)) {
+						throw new AssertionError("Unable to find Minecraft dev jar! Tried " + officialNames + ", " + parent + " and " + alternativeParent
+													+ "\nPlease supply it explicitly with -Doptifabric.mc-jar");
+					}
+
+					parent = alternativeParent;
 				}
 
 				officialNames = parent;
