@@ -19,6 +19,10 @@ import org.apache.commons.io.IOUtils;
 public class ZipUtils {
 	public interface ZipTransformer {
 		InputStream apply(ZipFile zip, ZipEntry entry) throws IOException;
+
+		default String mapName(ZipEntry entry) {
+			return entry.getName();
+		}
 	}
 
 	public interface ZipVisitor extends ZipTransformer {
@@ -160,7 +164,7 @@ public class ZipUtils {
 
 				try (InputStream in = transformer.apply(origin, entry)) {
 					if (in != null) {
-						out.putNextEntry(pure ? new ZipEntry(entry) : new ZipEntry(entry.getName()));
+						out.putNextEntry(pure ? new ZipEntry(entry) : new ZipEntry(transformer.mapName(entry)));
 						IOUtils.copy(in, out);
 					}
 				}

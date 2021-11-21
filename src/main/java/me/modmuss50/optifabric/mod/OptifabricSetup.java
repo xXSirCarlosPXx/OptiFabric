@@ -12,6 +12,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -68,8 +70,37 @@ public class OptifabricSetup implements Runnable {
 																		+ "Lnet/minecraft/class_765;Lnet/minecraft/class_4184;FLnet/minecraft/class_4604;)V");
 
 						for (MethodNode method : node.methods) {
-							if ("renderParticles".equals(method.name) && desc.equals(method.desc)) {
+							if (("renderParticles".equals(method.name) || "render".equals(method.name)) && desc.equals(method.desc)) {
 								return true;
+							}
+						}
+
+						return false;
+					}).isPresent();
+					haveLooked = true;
+				}
+
+				return isPresent;
+			}
+		};
+		BooleanSupplier farPlanePresent = new BooleanSupplier() {
+			private boolean haveLooked, isPresent;
+
+			@Override
+			public boolean getAsBoolean() {
+				if (!haveLooked) {
+					isPresent = injector.predictFuture(RemappingUtils.getClassName("class_757")).filter(node -> {//GameRenderer
+						String render = RemappingUtils.getMethodName("class_757", "method_3192", "(FJZ)V");
+
+						for (MethodNode method : node.methods) {
+							if (render.equals(method.name) && "(FJZ)V".equals(method.desc)) {
+								for (AbstractInsnNode insn : method.instructions) {
+									if (insn.getType() == AbstractInsnNode.FIELD_INSN && "ForgeHooksClient_getGuiFarPlane".equals(((FieldInsnNode) insn).name)) {
+										return true;
+									}
+								}
+
+								break;
 							}
 						}
 
@@ -116,7 +147,11 @@ public class OptifabricSetup implements Runnable {
 
 		if (isPresent("fabric-screen-api-v1")) {
 			if (isPresent("minecraft", ">=1.17-alpha.21.10.a")) {
-				Mixins.addConfiguration("optifabric.compat.fabric-screen-api.new-mixins.json");
+				if (farPlanePresent.getAsBoolean()) {
+					Mixins.addConfiguration("optifabric.compat.fabric-screen-api.newer-mixins.json");
+				} else {
+					Mixins.addConfiguration("optifabric.compat.fabric-screen-api.new-mixins.json");
+				}
 			} else {
 				Mixins.addConfiguration("optifabric.compat.fabric-screen-api.mixins.json");
 			}
@@ -126,7 +161,11 @@ public class OptifabricSetup implements Runnable {
 		Mixins.addConfiguration("optifabric.optifine.mixins.json");
 
 		if (isPresent("cloth-client-events-v0", ">=2.0")) {
-			Mixins.addConfiguration("optifabric.compat.cloth.new-mixins.json");
+			if (farPlanePresent.getAsBoolean()) {
+				Mixins.addConfiguration("optifabric.compat.cloth.newer-mixins.json");
+			} else {
+				Mixins.addConfiguration("optifabric.compat.cloth.new-mixins.json");
+			}
 		} else if (isPresent("cloth-client-events-v0")) {
 			Mixins.addConfiguration("optifabric.compat.cloth.mixins.json");
 		}
@@ -260,7 +299,11 @@ public class OptifabricSetup implements Runnable {
 
 		if (isPresent("architectury", ">=2.0")) {
 			assert isPresent("minecraft", ">=1.17-beta.1");
-			Mixins.addConfiguration("optifabric.compat.architectury-AB.new-mixins.json");
+			if (farPlanePresent.getAsBoolean()) {
+				Mixins.addConfiguration("optifabric.compat.architectury-AB.newer-mixins.json");
+			} else {
+				Mixins.addConfiguration("optifabric.compat.architectury-AB.new-mixins.json");
+			}
 		} else if (isPresent("architectury", ">=1.0.20")) {
 			Mixins.addConfiguration("optifabric.compat.architectury-B.mixins.json");
 		} else if (isPresent("architectury", ">=1.0.4")) {

@@ -14,8 +14,10 @@ import me.modmuss50.optifabric.compat.Shim;
 @InterceptingMixin("net/fabricmc/fabric/mixin/client/rendering/MixinWorldRenderer")
 abstract class WorldRendererMixin {
 	@Inject(method = "render", require = 2,
-			at = @At(value = "INVOKE", 
-					target = "Lnet/minecraft/client/particle/ParticleManager;renderParticles(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/LightmapTextureManager;Lnet/minecraft/client/render/Camera;FLnet/minecraft/client/render/Frustum;)V"))
+			at = {@At(value = "INVOKE", 
+					target = "Lnet/minecraft/client/particle/ParticleManager;renderParticles(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/LightmapTextureManager;Lnet/minecraft/client/render/Camera;FLnet/minecraft/client/render/Frustum;)V"),
+					@At(value = "INVOKE", 
+					target = "Lnet/minecraft/client/particle/ParticleManager;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/LightmapTextureManager;Lnet/minecraft/client/render/Camera;FLnet/minecraft/client/render/Frustum;)V")})
 	private void onReallyRenderParticles(CallbackInfo call) {
 		onRenderParticles(call);
 	}

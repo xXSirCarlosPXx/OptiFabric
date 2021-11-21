@@ -131,6 +131,8 @@ compileJava {
 		method 'net/optifine/reflect/ReflectorForge', '(Lnet/minecraft/item/ItemStack;)Z', 'isItemDamaged', 'isItemDamaged'
 		method 'net/minecraft/client/particle/ParticleManager', '(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;' +
 		'Lnet/minecraft/client/render/LightmapTextureManager;Lnet/minecraft/client/render/Camera;FLnet/minecraft/client/render/Frustum;)V', 'renderParticles', 'renderParticles'
+		method 'net/minecraft/client/particle/ParticleManager', '(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;' +
+		'Lnet/minecraft/client/render/LightmapTextureManager;Lnet/minecraft/client/render/Camera;FLnet/minecraft/client/render/Frustum;)V', 'render', 'render'
 		method 'net/optifine/BlockPosM', '(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Ljava/lang/Iterable;', 'getAllInBoxMutable', 'getAllInBoxMutable'
 		method 'net/minecraft/network/PacketByteBuf', '(Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/network/PacketByteBuf;', 'writeItemStack', 'writeItemStack' 
 		it.class 'net/minecraft/world/HeightLimitView', 'net/minecraft/class_5539'

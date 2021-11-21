@@ -70,7 +70,10 @@ public class OptifineVersion {
 	private static JarType getJarType(File file) throws IOException {
 		ClassNode classNode;
 		try (JarFile jarFile = new JarFile(file)) {
-			JarEntry jarEntry = jarFile.getJarEntry("net/optifine/Config.class"); // New 1.14.3 location
+			JarEntry jarEntry = jarFile.getJarEntry("net/optifine/Config.class"); //F1 (1.14.2) - G9 location
+			if (jarEntry == null) {
+				jarEntry = jarFile.getJarEntry("notch/net/optifine/Config.class"); //H1 (1.17.1) location
+			}
 			if (jarEntry == null) {
 				return JarType.SOMETHING_ELSE;
 			}

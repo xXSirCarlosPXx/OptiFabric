@@ -125,23 +125,18 @@ public class OptifineSetup {
 
 		//Find all the SRG named classes and remove them
 		ZipUtils.transform(optifineModJar, new ZipTransformer() {
-			private boolean keep(String name) {
-				if (name.startsWith("com/mojang/blaze3d/platform/")) {
-					int split = name.indexOf('$');
-
-					//Keep the class if not of the form com/mojang/blaze3d/platform/MojangName$InnerVoldeName.class
-					return split <= 0 || name.length() - split <= 8;
-				}
-
-				return !(name.startsWith("srg/") || name.startsWith("net/minecraft/"));
+			@Override
+			public String mapName(ZipEntry entry) {
+				String out = entry.getName();
+				return out.startsWith("notch/") ? out.substring(6) : out;
 			}
 
 			@Override
 			public InputStream apply(ZipFile zip, ZipEntry entry) throws IOException {
 				String name = entry.getName();
 
-				if (keep(name)) {
-					if (name.endsWith(".class") && !name.startsWith("net/") && !name.startsWith("optifine/") && !name.startsWith("javax/")) {
+				if (!name.startsWith("srg/")) {
+					if (name.endsWith(".class") && !name.startsWith("net/") && !name.startsWith("notch/net/") && !name.startsWith("optifine/") && !name.startsWith("javax/")) {
 						//System.out.println("Finding lambdas to fix in ".concat(name));
 						ClassNode node = ASMUtils.readClass(zip, entry);
 
