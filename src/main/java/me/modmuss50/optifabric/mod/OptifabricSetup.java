@@ -51,7 +51,9 @@ public class OptifabricSetup implements Runnable {
 				OptifineVersion.jarType = JarType.INTERNAL_ERROR;
 				OptifabricError.setError(e, "Failed to load OptiFine, please report this!\n\n" + e.getMessage());
 			}
-			throw new RuntimeException("Failed to setup optifine", e);
+			System.err.println("Failed to setup optifine:");
+			e.printStackTrace();
+			return; //Avoid crashing out any other Fabric ASM users
 		}
 
 		BooleanSupplier particlesPresent = new BooleanSupplier() {

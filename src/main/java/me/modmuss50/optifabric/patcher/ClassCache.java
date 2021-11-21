@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.zip.CRC32;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipException;
 
 import org.apache.commons.lang3.Validate;
 
@@ -152,6 +153,9 @@ public class ClassCache {
 			}
 
 			return classCache;
+		} catch (ZipException e) {
+			//InflaterInputStream can throw this when the data is corrupt
+			return new ClassCache(null);
 		}
 	}
 

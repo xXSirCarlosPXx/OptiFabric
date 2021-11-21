@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipError;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -87,23 +86,22 @@ public class OptifineSetup {
 				return Pair.of(remappedJar, classCache);
 			} else {
 				System.out.println("Class cache is from a different optifine jar, deleting and re-generating");
-				optifinePatches.delete();
 			}
 		} else {
 			System.out.println("Setting up optifine for the first time, this may take a few seconds.");
 		}
 
 		Path minecraftJar = getMinecraftJar();
+		File workDir = Files.createTempDirectory("optifabric").toFile();
 
 		if (OptifineVersion.jarType == JarType.OPTIFINE_INSTALLER) {
-			File optifineMod = new File(versionDir, "Optifine-mod.jar");
-			out: if (!optifineMod.exists()) {
+			File optifineMod = new File(workDir, "Optifine-mod.jar");
+
+			out: if (!optifineMod.exists() || !ZipUtils.isValid(optifineMod)) {
 				for (int attempt = 1; attempt <= 3; attempt++) {
 					runInstaller(optifineModJar, optifineMod, minecraftJar.toFile());
 
-					try {
-						new ZipFile(optifineMod).close();
-					} catch (ZipException | ZipError e) {
+					if (!ZipUtils.isValid(optifineMod)) {
 						optifineMod.delete();
 						continue;
 					}
@@ -115,11 +113,12 @@ public class OptifineSetup {
 				OptifabricError.setError("OptiFine installer keeps producing corrupt jars!\nRan: %s 3 times\nMinecraft jar: %s", optifineModJar, minecraftJar);
 				throw new ZipException("Ran OptiFine installer (" + optifineModJar + ") three times without a valid jar produced");
 			}
+
 			optifineModJar = optifineMod;
 		}
 
 		//A jar without srgs
-		File jarOfTheFree = new File(versionDir, "Optifine-jarofthefree.jar");
+		File jarOfTheFree = new File(workDir, "Optifine-jarofthefree.jar");
 		LambdaRebuilder rebuilder = new LambdaRebuilder(minecraftJar.toFile());
 
 		System.out.println("De-Volderfiying jar");
@@ -163,13 +162,21 @@ public class OptifineSetup {
 
 		String namespace = FabricLoader.getInstance().getMappingResolver().getCurrentRuntimeNamespace();
 		System.out.println("Remapping optifine from official to " + namespace);
-		remapOptifine(jarOfTheFree, getLibs(minecraftJar), remappedJar, createMappings("official", namespace, rebuilder));
+		File completeJar = new File(workDir, "Optifine-remapped.jar");
+		remapOptifine(jarOfTheFree, getLibs(minecraftJar), completeJar, createMappings("official", namespace, rebuilder));
+
+		if ((remappedJar.exists() && !remappedJar.delete()) || !completeJar.renameTo(remappedJar)) {
+			System.err.println("Failed to clear " + remappedJar + ", is another instance of the game running?");
+			remappedJar = completeJar;
+		}
+		if (optifinePatches.exists() && !optifinePatches.delete()) {
+			System.err.println("Failed to clear " + optifinePatches + ", is another instance of the game running?");
+			optifinePatches = new File(workDir, "Optifine.classes.gz");
+		}
 
 		//We are done, lets get rid of the stuff we no longer need
-		jarOfTheFree.delete();
-		if (OptifineVersion.jarType == JarType.OPTIFINE_INSTALLER) {
-			optifineModJar.delete();
-		}
+		workDir.deleteOnExit();
+		for (File file : workDir.listFiles()) file.deleteOnExit();
 
 		boolean extract = Boolean.getBoolean("optifabric.extract");
 		if (extract) {
