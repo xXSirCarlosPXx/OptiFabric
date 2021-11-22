@@ -7,13 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -30,11 +32,11 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.launch.common.FabricLauncherBase;
-import net.fabricmc.loader.util.UrlConversionException;
-import net.fabricmc.loader.util.UrlUtil;
-import net.fabricmc.loader.util.mappings.TinyRemapperMappingsHelper;
 import net.fabricmc.mapping.tree.ClassDef;
+import net.fabricmc.mapping.tree.FieldDef;
+import net.fabricmc.mapping.tree.MethodDef;
 import net.fabricmc.mapping.tree.TinyTree;
 
 import net.fabricmc.tinyremapper.IMappingProvider;
@@ -264,7 +266,18 @@ public class OptifineSetup {
 
 		//In prod
 		return (out) -> {
-			TinyRemapperMappingsHelper.create(normalMappings, from, to).load(out);
+			for (ClassDef classDef : normalMappings.getClasses()) {
+				String className = classDef.getName(from);
+				out.acceptClass(className, classDef.getName(to));
+
+				for (FieldDef field : classDef.getFields()) {
+					out.acceptField(new Member(className, field.getName(from), field.getDescriptor(from)), field.getName(to));
+				}
+
+				for (MethodDef method : classDef.getMethods()) {
+					out.acceptMethod(new Member(className, method.getName(from), method.getDescriptor(from)), method.getName(to));
+				}
+			}
 
 			extraMethods.forEach(out::acceptMethod);
 			extraFields.forEach(out::acceptField);
@@ -277,9 +290,9 @@ public class OptifineSetup {
 	private static Path[] getLibs(Path minecraftJar) {
 		Path[] libs = FabricLauncherBase.getLauncher().getLoadTimeDependencies().stream().map(url -> {
 			try {
-				return UrlUtil.asPath(url);
-			} catch (UrlConversionException e) {
-				throw new RuntimeException(e);
+				return Paths.get(url.toURI());
+			} catch (URISyntaxException e) {
+				throw new RuntimeException("Failed to convert " + url + " to path", e);
 			}
 		}).filter(Files::exists).toArray(Path[]::new);
 
@@ -344,9 +357,22 @@ public class OptifineSetup {
 	}
 
 	private static Path getLaunchMinecraftJar() {
-		List<Path> contextJars = ((net.fabricmc.loader.FabricLoader) FabricLoader.getInstance()).getGameProvider().getGameContextJars();
-		if (contextJars.isEmpty()) throw new IllegalStateException("Start has no context?");
-		return contextJars.get(0);
+		try {
+			return (Path) FabricLoader.getInstance().getObjectShare().get("fabric-loader:inputGameJar");
+		} catch (NoClassDefFoundError | NoSuchMethodError old) {
+			ModContainer mod = FabricLoader.getInstance().getModContainer("minecraft").orElseThrow(() -> new IllegalStateException("No Minecraft?"));
+			URI uri = mod.getRootPath().toUri();
+			assert "jar".equals(uri.getScheme());
+
+			String path = uri.getSchemeSpecificPart();
+			int split = path.lastIndexOf("!/");
+
+			try {
+				return Paths.get(new URI(path.substring(0, split)));
+			} catch (URISyntaxException e) {
+				throw new RuntimeException("Failed to find Minecraft jar from " + uri + " (calculated " + path.substring(0, split) + ')', e);
+			}
+		}
 	}
 
 	private static ClassCache generateClassCache(File from, File to, byte[] hash, boolean extractClasses) throws IOException {

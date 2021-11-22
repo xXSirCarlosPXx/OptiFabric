@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import net.minecraft.client.options.GameOptions;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.option.KeyBinding;
 
 import me.modmuss50.optifabric.compat.InterceptingMixin;
 import me.modmuss50.optifabric.compat.LoudCoerce;
@@ -28,7 +28,7 @@ abstract class GameOptionsMixin {
 
 	@Inject(method = "write",
 			at = @At(value = "INVOKE", target = "Ljava/io/PrintWriter;println(Ljava/lang/String;)V", ordinal = 1, remap = false),
-			slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/options/GameOptions;keysAll:[Lnet/minecraft/client/options/KeyBinding;")),
+			slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;keysAll:[Lnet/minecraft/client/option/KeyBinding;")),
 			locals = LocalCapture.CAPTURE_FAILSOFT)
 	private void onKeyBindingWritten(CallbackInfo callbackInfo, PrintWriter printWriter, @Coerce Object closeException,
 										KeyBinding[] keyBindings, int keyBindingsCount, int index, KeyBinding keyBinding) {
