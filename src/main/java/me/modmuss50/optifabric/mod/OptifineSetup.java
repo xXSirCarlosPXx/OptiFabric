@@ -367,6 +367,11 @@ public class OptifineSetup {
 			String path = uri.getSchemeSpecificPart();
 			int split = path.lastIndexOf("!/");
 
+			if (path.substring(0, split).indexOf(' ') > 0 && path.startsWith("file:///")) {//This is meant to be a URI...
+				Path out = Paths.get(path.substring(8, split));
+				if (Files.exists(out)) return out;
+			}
+
 			try {
 				return Paths.get(new URI(path.substring(0, split)));
 			} catch (URISyntaxException e) {
