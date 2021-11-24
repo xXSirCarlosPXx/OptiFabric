@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -51,6 +52,7 @@ import me.modmuss50.optifabric.patcher.LambdaRebuilder;
 import me.modmuss50.optifabric.util.ASMUtils;
 import me.modmuss50.optifabric.util.ZipUtils;
 import me.modmuss50.optifabric.util.ZipUtils.ZipTransformer;
+import me.modmuss50.optifabric.util.ZipUtils.ZipVisitor;
 
 public class OptifineSetup {
 	public static Pair<File, ClassCache> getRuntime() throws IOException {
@@ -162,9 +164,14 @@ public class OptifineSetup {
 		File completeJar = new File(workDir, "Optifine-remapped.jar");
 		remapOptifine(jarOfTheFree, getLibs(minecraftJar), completeJar, createMappings("official", namespace, rebuilder));
 
-		if ((remappedJar.exists() && !remappedJar.delete()) || !completeJar.renameTo(remappedJar)) {
+		Consumer<ZipVisitor> jarFinaliser;
+		if (remappedJar.exists() && !remappedJar.delete()) {
 			System.err.println("Failed to clear " + remappedJar + ", is another instance of the game running?");
 			remappedJar = completeJar;
+			jarFinaliser = visitor -> ZipUtils.filterInPlace(completeJar, visitor);
+		} else {
+			final File finalRemappedJar = remappedJar; //It's final in this code path... but javac knows it's not final everywhere
+			jarFinaliser = visitor -> ZipUtils.filter(completeJar, visitor, finalRemappedJar);
 		}
 		if (optifinePatches.exists() && !optifinePatches.delete()) {
 			System.err.println("Failed to clear " + optifinePatches + ", is another instance of the game running?");
@@ -185,7 +192,7 @@ public class OptifineSetup {
 			ZipUtils.extract(remappedJar, optifineClasses);
 		}
 
-		return Pair.of(remappedJar, generateClassCache(remappedJar, optifinePatches, modHash, extract));
+		return Pair.of(remappedJar, generateClassCache(jarFinaliser, optifinePatches, modHash, extract));
 	}
 
 	private static void runInstaller(File installer, File output, File minecraftJar) throws IOException {
@@ -380,7 +387,7 @@ public class OptifineSetup {
 		}
 	}
 
-	private static ClassCache generateClassCache(File from, File to, byte[] hash, boolean extractClasses) throws IOException {
+	private static ClassCache generateClassCache(Consumer<ZipVisitor> from, File to, byte[] hash, boolean extractClasses) throws IOException {
 		File classesDir = new File(to.getParent(), "classes");
 		if (extractClasses) {
 			if (classesDir.exists()) {
@@ -391,7 +398,7 @@ public class OptifineSetup {
 		}
 		ClassCache classCache = new ClassCache(hash);
 
-		ZipUtils.filterInPlace(from, (jarFile, entry) -> {
+		from.accept((jarFile, entry) -> {
 			String name = entry.getName();
 
 			if ((name.startsWith("net/minecraft/") || name.startsWith("com/mojang/")) && name.endsWith(".class")) {
