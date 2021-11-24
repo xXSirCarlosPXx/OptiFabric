@@ -158,6 +158,10 @@ public class OptifabricSetup implements Runnable {
 			usingScreenAPI = true;
 		}
 
+		if (isPresent("fabric-lifecycle-events-v1", ">=1.4.6")) {
+			Mixins.addConfiguration("optifabric.compat.fabric-lifecycle-events.mixins.json");
+		}
+
 		Mixins.addConfiguration("optifabric.optifine.mixins.json");
 
 		if (isPresent("cloth-client-events-v0", ">=2.0")) {
