@@ -189,7 +189,7 @@ public class OptifineSetup {
 			if(optifineClasses.exists()){
 				FileUtils.deleteDirectory(optifineClasses);
 			}
-			ZipUtils.extract(remappedJar, optifineClasses);
+			ZipUtils.extract(completeJar, optifineClasses);
 		}
 
 		return Pair.of(remappedJar, generateClassCache(jarFinaliser, optifinePatches, modHash, extract));
