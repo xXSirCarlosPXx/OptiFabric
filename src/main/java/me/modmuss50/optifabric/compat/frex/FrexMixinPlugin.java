@@ -24,7 +24,7 @@ import net.fabricmc.tinyremapper.IMappingProvider.Member;
 
 import me.modmuss50.optifabric.compat.InterceptingMixinPlugin;
 import me.modmuss50.optifabric.util.RemappingUtils;
-import me.modmuss50.optifabric.util.MixinFinder.Mixin;
+import me.modmuss50.optifabric.util.MixinUtils.Mixin;
 
 public class FrexMixinPlugin extends InterceptingMixinPlugin {
 	@Target(ElementType.METHOD)

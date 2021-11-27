@@ -1,6 +1,6 @@
 package me.modmuss50.optifabric.util;
 
-import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -13,16 +13,18 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.mixin.transformer.ClassInfo;
+import org.spongepowered.asm.mixin.transformer.ClassInfo.Method;
 
-public class MixinFinder {
+public class MixinUtils {
 	public static class MixinInfo {
 		private final IMixinConfig config;
-		private final Method getMixins;
+		private final java.lang.reflect.Method getMixins;
 
 		MixinInfo(IMixinConfig config) {
 			this.config = config;
@@ -140,5 +142,26 @@ public class MixinFinder {
 
 	public static List<Mixin> getMixinsFor(String target) {
 		return MIXINS.stream().filter(info -> info.hasMixinFor(target)).flatMap(info -> info.getMixinsFor(target).stream()).map(Mixin::new).sorted().collect(Collectors.toList());
+	}
+
+	public static void completeClassInfo(ClassInfo info, Iterable<MethodNode> methods) {
+		Set<String> known = info.getMethods().stream().map(method -> method.getName().concat(method.getDesc())).collect(Collectors.toSet());
+		List<Method> extra = new ArrayList<>();
+
+		for (MethodNode method : methods) {
+			if (!known.contains(method.name.concat(method.desc)) && method.name.charAt(0) != '<') {
+				extra.add(info.new Method(method));
+			}
+		}
+
+		if (!extra.isEmpty()) {
+			try {
+				@SuppressWarnings("unchecked") //We need to add to this...
+				Set<Method> allMethods = (Set<Method>) FieldUtils.readDeclaredField(info, "methods", true);
+				allMethods.addAll(extra);
+			} catch (ReflectiveOperationException e) {
+				throw new RuntimeException("Unable to add extra " + extra.size() + " methods to " + info + "'s class info", e);
+			}
+		}
 	}
 }

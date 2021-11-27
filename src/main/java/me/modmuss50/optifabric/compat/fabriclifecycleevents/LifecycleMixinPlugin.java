@@ -18,7 +18,7 @@ public class LifecycleMixinPlugin extends InterceptingMixinPlugin {
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
 		if ("ClientChunkManagerMixin".equals(mixinInfo.getName())) {
-			String loadChunkFromPacketDesc = "(IILnet/minecraft/class_4548;Lnet/minecraft/class_2540;Lnet/minecraft/class_2487;Ljava/util/BitSet;)Lnet/minecraft/class_2818;";
+			String loadChunkFromPacketDesc = getLoadChunkFromPacketDesc();
 			String loadChunkFromPacket = RemappingUtils.getMethodName("class_631", "method_16020", loadChunkFromPacketDesc); //(BiomeArray, PacketByteBuf, NbtCompound)WorldChunk
 			loadChunkFromPacketDesc = RemappingUtils.mapMethodDescriptor(loadChunkFromPacketDesc);
 
@@ -45,5 +45,9 @@ public class LifecycleMixinPlugin extends InterceptingMixinPlugin {
 		}
 
 		super.preApply(targetClassName, targetClass, mixinClassName, mixinInfo);
+	}
+
+	protected String getLoadChunkFromPacketDesc() {
+		return "(IILnet/minecraft/class_4548;Lnet/minecraft/class_2540;Lnet/minecraft/class_2487;Ljava/util/BitSet;)Lnet/minecraft/class_2818;";
 	}
 }

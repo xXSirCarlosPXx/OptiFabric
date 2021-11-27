@@ -1,27 +1,21 @@
-package me.modmuss50.optifabric.compat.fabricrendererapi;
+package me.modmuss50.optifabric.compat.fabricrenderingdata;
 
 import org.objectweb.asm.tree.ClassNode;
 
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.mixin.transformer.ClassInfo;
 
-import me.modmuss50.optifabric.compat.EmptyMixinPlugin;
+import me.modmuss50.optifabric.compat.InterceptingMixinPlugin;
 import me.modmuss50.optifabric.util.MixinUtils;
 
-public class RendererMixinPlugin extends EmptyMixinPlugin {
+public class RenderingDataExtraMixinPlugin extends InterceptingMixinPlugin {
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		switch (mixinInfo.getName()) {
-		case "BlockModelRendererMixin":
-		case "BlockRenderManagerMixin": {
+		if ("ChunkRendererRegionMixin".equals(mixinInfo.getName())) {
 			ClassInfo info = ClassInfo.forName(targetClassName);
 			MixinUtils.completeClassInfo(info, targetClass.methods);
-			break;
 		}
-		}
-	}
 
-	@Override
-	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+		super.preApply(targetClassName, targetClass, mixinClassName, mixinInfo);
 	}
 }

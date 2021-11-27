@@ -26,8 +26,8 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.transformer.ClassInfo.Method;
 import org.spongepowered.asm.util.Annotations;
 
-import me.modmuss50.optifabric.util.MixinFinder;
-import me.modmuss50.optifabric.util.MixinFinder.Mixin;
+import me.modmuss50.optifabric.util.MixinUtils;
+import me.modmuss50.optifabric.util.MixinUtils.Mixin;
 import me.modmuss50.optifabric.util.RemappingUtils;
 
 public class InterceptingMixinPlugin extends EmptyMixinPlugin {
@@ -81,7 +81,7 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 	}
 
 	private static Mixin findMixin(String targetClass, String mixinTarget) {
-		for (Mixin mixin : MixinFinder.getMixinsFor(targetClass)) {
+		for (Mixin mixin : MixinUtils.getMixinsFor(targetClass)) {
 			if (mixinTarget.equals(mixin.getName())) {
 				return mixin;
 			}
