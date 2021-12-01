@@ -124,7 +124,7 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("fabric-rendering-data-attachment-v1")) {
 			Mixins.addConfiguration("optifabric.compat.fabric-rendering-data.mixins.json");
 
-			if (isPresent("minecraft", ">=1.18-alpha.21.37.a")) {
+			if (isPresent("minecraft", "=1.18-beta.1")) {
 				Mixins.addConfiguration("optifabric.compat.fabric-rendering-data.extra-mixins.json");
 			}
 		}
