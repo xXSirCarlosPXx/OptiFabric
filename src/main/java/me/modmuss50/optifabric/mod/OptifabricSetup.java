@@ -58,58 +58,44 @@ public class OptifabricSetup implements Runnable {
 			return; //Avoid crashing out any other Fabric ASM users
 		}
 
-		BooleanSupplier particlesPresent = new BooleanSupplier() {
-			private boolean haveLooked, isPresent;
-
+		BooleanSupplier particlesPresent = new FeatureFinder() {
 			@Override
-			public boolean getAsBoolean() {
-				if (!haveLooked) {
-					isPresent = injector.predictFuture(RemappingUtils.getClassName("class_702")).filter(node -> {//ParticleManager
-						//(MatrixStack, VertexConsumerProvider$Immediate, LightmapTextureManager, Camera, Frustum)
-						String desc = RemappingUtils.mapMethodDescriptor("(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597$class_4598;"
-																		+ "Lnet/minecraft/class_765;Lnet/minecraft/class_4184;FLnet/minecraft/class_4604;)V");
+			protected boolean isPresent() {
+				return injector.predictFuture(RemappingUtils.getClassName("class_702")).filter(node -> {//ParticleManager
+					//(MatrixStack, VertexConsumerProvider$Immediate, LightmapTextureManager, Camera, Frustum)
+					String desc = RemappingUtils.mapMethodDescriptor("(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597$class_4598;"
+																	+ "Lnet/minecraft/class_765;Lnet/minecraft/class_4184;FLnet/minecraft/class_4604;)V");
 
-						for (MethodNode method : node.methods) {
-							if (("renderParticles".equals(method.name) || "render".equals(method.name)) && desc.equals(method.desc)) {
-								return true;
-							}
+					for (MethodNode method : node.methods) {
+						if (("renderParticles".equals(method.name) || "render".equals(method.name)) && desc.equals(method.desc)) {
+							return true;
 						}
+					}
 
-						return false;
-					}).isPresent();
-					haveLooked = true;
-				}
-
-				return isPresent;
+					return false;
+				}).isPresent();
 			}
 		};
-		BooleanSupplier farPlanePresent = new BooleanSupplier() {
-			private boolean haveLooked, isPresent;
-
+		BooleanSupplier farPlanePresent = new FeatureFinder() {
 			@Override
-			public boolean getAsBoolean() {
-				if (!haveLooked) {
-					isPresent = injector.predictFuture(RemappingUtils.getClassName("class_757")).filter(node -> {//GameRenderer
-						String render = RemappingUtils.getMethodName("class_757", "method_3192", "(FJZ)V");
+			protected boolean isPresent() {
+				return injector.predictFuture(RemappingUtils.getClassName("class_757")).filter(node -> {//GameRenderer
+					String render = RemappingUtils.getMethodName("class_757", "method_3192", "(FJZ)V");
 
-						for (MethodNode method : node.methods) {
-							if (render.equals(method.name) && "(FJZ)V".equals(method.desc)) {
-								for (AbstractInsnNode insn : method.instructions) {
-									if (insn.getType() == AbstractInsnNode.FIELD_INSN && "ForgeHooksClient_getGuiFarPlane".equals(((FieldInsnNode) insn).name)) {
-										return true;
-									}
+					for (MethodNode method : node.methods) {
+						if (render.equals(method.name) && "(FJZ)V".equals(method.desc)) {
+							for (AbstractInsnNode insn : method.instructions) {
+								if (insn.getType() == AbstractInsnNode.FIELD_INSN && "ForgeHooksClient_getGuiFarPlane".equals(((FieldInsnNode) insn).name)) {
+									return true;
 								}
-
-								break;
 							}
+
+							break;
 						}
+					}
 
-						return false;
-					}).isPresent();
-					haveLooked = true;
-				}
-
-				return isPresent;
+					return false;
+				}).isPresent();
 			}
 		};
 
@@ -124,8 +110,32 @@ public class OptifabricSetup implements Runnable {
 		if (isPresent("fabric-rendering-data-attachment-v1")) {
 			Mixins.addConfiguration("optifabric.compat.fabric-rendering-data.mixins.json");
 
-			if (isPresent("minecraft", "=1.18-beta.1")) {
-				Mixins.addConfiguration("optifabric.compat.fabric-rendering-data.extra-mixins.json");
+			if (isPresent("fabric-rendering-data-attachment-v1", ">0.3.0")) {
+				//0.43.1+ and with a patch to ChunkRendererRegionBuilder
+				injector.predictFuture(RemappingUtils.getClassName("class_6850")).ifPresent(node -> {//ChunkRendererRegionBuilder, (World, BlockPos, BlockPos)ChunkRendererRegion
+					String desc = RemappingUtils.mapMethodDescriptor("(Lnet/minecraft/class_1937;Lnet/minecraft/class_2338;Lnet/minecraft/class_2338;IZ)Lnet/minecraft/class_853;");
+
+					for (MethodNode method : node.methods) {
+						if ("createRegion".equals(method.name) && desc.equals(method.desc)) {
+							assert isPresent("minecraft", ">=1.18-rc.1");
+							Mixins.addConfiguration("optifabric.compat.fabric-rendering-data.bonus-mixins.json");
+							break;
+						}
+					}
+				});
+			} else if (isPresent("fabric-rendering-data-attachment-v1", ">0.2.0")) {
+				//Below 0.43.1 and with a patch to ChunkRendererRegion
+				injector.predictFuture(RemappingUtils.getClassName("class_853")).ifPresent(node -> {//ChunkRendererRegion, (World, BlockPos, BlockPos)ChunkRendererRegion
+					String desc = RemappingUtils.mapMethodDescriptor("(Lnet/minecraft/class_1937;Lnet/minecraft/class_2338;Lnet/minecraft/class_2338;IZ)Lnet/minecraft/class_853;");
+
+					for (MethodNode method : node.methods) {
+						if ("generateCache".equals(method.name) && desc.equals(method.desc)) {
+							assert isPresent("minecraft", ">=1.18-beta.1");
+							Mixins.addConfiguration("optifabric.compat.fabric-rendering-data.extra-mixins.json");
+							break;
+						}
+					}
+				});
 			}
 		}
 
