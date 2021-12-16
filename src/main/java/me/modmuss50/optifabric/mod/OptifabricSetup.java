@@ -240,7 +240,7 @@ public class OptifabricSetup implements Runnable {
 		}
 
 		if (isPresent("carpet")) {
-			if (!isPresent("minecraft", "1.17.x")) {
+			if (!isPresent("minecraft", ">=1.17")) {
 				Mixins.addConfiguration("optifabric.compat.carpet.mixins.json");
 			}
 
@@ -404,7 +404,7 @@ public class OptifabricSetup implements Runnable {
 		}
 
 		if (isPresent("replaymod")) {
-			if (isPresent("minecraft", "1.17.x")) {
+			if (isPresent("minecraft", ">=1.17")) {
 				Mixins.addConfiguration("optifabric.compat.replaymod.new-mixins.json");
 			} else {
 				Mixins.addConfiguration("optifabric.compat.replaymod.mixins.json");
