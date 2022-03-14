@@ -15,9 +15,9 @@ import net.minecraft.world.BlockRenderView;
 @Pseudo
 @Mixin(targets = "net/minecraft/client/particle/ParticleManager")
 public abstract class ParticleManagerMixin {
-    @Inject(method = "updateTerrainParticleColor", at = @At("HEAD"), cancellable = true, remap = true)
-    private static void updateTerrainParticleColor(Particle particle, BlockState state, BlockRenderView world, BlockPos pos, @Coerce Object renderEnv, CallbackInfo call) {
-        // guard this optifine function against calls with null `renderEnv`
-        if (renderEnv == null) call.cancel();
-    }
+	@Inject(method = "updateTerrainParticleColor", at = @At("HEAD"), cancellable = true, remap = true, require = 0)
+	private static void updateTerrainParticleColor(Particle particle, BlockState state, BlockRenderView world, BlockPos pos, @Coerce Object renderEnv, CallbackInfo call) {
+		// guard this optifine function against calls with null `renderEnv`
+		if (renderEnv == null) call.cancel();
+	}
 }
