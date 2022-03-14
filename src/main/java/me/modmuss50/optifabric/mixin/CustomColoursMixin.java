@@ -21,7 +21,7 @@ import net.minecraft.world.BlockRenderView;
 @Pseudo
 @Mixin(targets = "net/optifine/CustomColors", remap = false)
 abstract class CustomColoursMixin {
-	@Group(name = "customColorsMixins", min = 1)
+	@Group(name = "customColorsMixins", min = 1, max = 1)
 	@Inject(method = "getColorMultiplier(ZLnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/util/math/BlockPos;Lnet/optifine/render/RenderEnv;)I", cancellable = true, remap = true,
 			at = @At(value = "FIELD", target = "Lnet/minecraft/block/Blocks;LILY_PAD:Lnet/minecraft/block/Block;", opcode = Opcodes.GETSTATIC, remap = true))
 	private static void skip(boolean quadHasTintIndex, BlockState blockState, BlockRenderView blockAccess, BlockPos blockPos, @Coerce Object renderEnv, CallbackInfoReturnable<Integer> call) {
@@ -30,7 +30,7 @@ abstract class CustomColoursMixin {
 		}
 	}
 
-	@Group(name = "customColorsMixins", min = 1)
+	@Group(name = "customColorsMixins", min = 1, max = 1)
 	@Inject(method = "getColorMultiplier", cancellable = true,
 			at = @At(value = "FIELD", target = "Lnet/minecraft/block/Blocks;LILY_PAD:Lnet/minecraft/block/Block;", opcode = Opcodes.GETSTATIC, remap = true))
 	private static void skipOld(BakedQuad quad, BlockState state, BlockRenderView world, BlockPos pos, @Coerce Object renderEnv, CallbackInfoReturnable<Integer> call) {
