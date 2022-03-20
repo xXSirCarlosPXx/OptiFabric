@@ -178,7 +178,10 @@ public class OptifabricSetup implements Runnable {
 
 		Mixins.addConfiguration("optifabric.optifine.mixins.json");
 
-		if (isPresent("cloth-client-events-v0", ">=2.0")) {
+		if (isPresent("fabricloader", ">=0.13.0") && isPresent("cloth-client-events-v0", ">=3.1.61")) {
+			// no mixins are needed -- cloth had a workaround for https://github.com/FabricMC/Mixin/issues/80
+			// but it is now fixed in fabricloader
+		} else if (isPresent("cloth-client-events-v0", ">=2.0")) {
 			if (farPlanePresent.getAsBoolean()) {
 				Mixins.addConfiguration("optifabric.compat.cloth.newer-mixins.json");
 			} else {
