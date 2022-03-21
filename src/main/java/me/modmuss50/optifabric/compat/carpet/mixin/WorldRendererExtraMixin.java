@@ -13,7 +13,7 @@ import me.modmuss50.optifabric.compat.Shim;
 @Mixin(WorldRenderer.class)
 @InterceptingMixin("carpet/mixins/WorldRenderer_pausedShakeMixin")
 abstract class WorldRendererExtraMixin {
-	@Group(min = 2, max = 2)
+	@Group(min = 2, max = 3)
 	@ModifyVariable(method = "render", argsOnly = true, ordinal = 0,
 					at = @At(value = "INVOKE", 
 								target = "Lnet/minecraft/client/particle/ParticleManager;renderParticles(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/LightmapTextureManager;Lnet/minecraft/client/render/Camera;FLnet/minecraft/client/render/Frustum;)V",
@@ -22,11 +22,11 @@ abstract class WorldRendererExtraMixin {
 		return changeTickPhaseBack(previous);
 	}
 
-	@Group(min = 2, max = 2)
+	@Group(min = 2, max = 3)
 	@ModifyVariable(method = "render", argsOnly = true, ordinal = 0,
-			at = @At(value = "INVOKE", 
-						target = "Lnet/minecraft/client/particle/ParticleManager;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/LightmapTextureManager;Lnet/minecraft/client/render/Camera;FLnet/minecraft/client/render/Frustum;)V",
-						shift = At.Shift.BEFORE))
+					at = @At(value = "INVOKE",
+								target = "Lnet/minecraft/client/particle/ParticleManager;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/render/LightmapTextureManager;Lnet/minecraft/client/render/Camera;FLnet/minecraft/client/render/Frustum;)V",
+								shift = At.Shift.BEFORE))
 	private float doNewChangeTickPhaseBack(float previous) {
 		return changeTickPhaseBack(previous);
 	}
