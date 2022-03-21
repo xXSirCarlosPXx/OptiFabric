@@ -407,7 +407,9 @@ public class OptifabricSetup implements Runnable {
 		}
 
 		if (isPresent("replaymod")) {
-			if (isPresent("minecraft", ">=1.17")) {
+			if (isPresent("minecraft", ">=1.18.1")) {
+				Mixins.addConfiguration("optifabric.compat.replaymod.newer-mixins.json");
+			} else if (isPresent("minecraft", ">=1.17")) {
 				Mixins.addConfiguration("optifabric.compat.replaymod.new-mixins.json");
 			} else {
 				Mixins.addConfiguration("optifabric.compat.replaymod.mixins.json");
