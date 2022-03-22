@@ -322,7 +322,9 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.images.mixins.json");
 		}
 
-		if (isPresent("architectury", ">=2.0")) {
+		if (isPresent("architectury", ">=3.7")) {
+			Mixins.addConfiguration("optifabric.compat.architectury-AB.newerer-mixins.json");
+		} else if (isPresent("architectury", ">=2.0")) {
 			assert isPresent("minecraft", ">=1.17-beta.1");
 			if (farPlanePresent.getAsBoolean()) {
 				Mixins.addConfiguration("optifabric.compat.architectury-AB.newer-mixins.json");

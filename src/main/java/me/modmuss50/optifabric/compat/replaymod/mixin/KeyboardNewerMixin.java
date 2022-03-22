@@ -29,20 +29,4 @@ abstract class KeyboardNewerMixin {
     private void keyReleased(int action, boolean[] handled, Screen screen, int keyCode, int scanCode, int modifiers, CallbackInfo call) {
         keyReleased(action, screen, handled, keyCode, scanCode, modifiers, call);
     }
-
-    @Shim
-    private static native void charTyped(Element element, int keyChar, int modifiers, CallbackInfo call);
-
-    @PlacatingSurrogate
-    private static void charTyped(Screen screen, int keyChar, int modifiers, CallbackInfo call) {
-        charTyped((Element) screen, keyChar, modifiers, call);
-    }
-
-    @Shim
-    private static native void charTyped(Element element, char keyChar, int modifiers, CallbackInfo call);
-
-    @PlacatingSurrogate
-    private static void charTyped(Screen screen, char keyChar, int modifiers, CallbackInfo call) {
-        charTyped((Element) screen, keyChar, modifiers, call);
-    }
 }
