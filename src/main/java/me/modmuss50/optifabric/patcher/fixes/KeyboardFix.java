@@ -55,6 +55,7 @@ public class KeyboardFix implements ClassFixer {
 						if (idin.bsmArgs.length == 3 && idin.bsmArgs[1] instanceof Handle) {
 							Handle handle = (Handle) idin.bsmArgs[1];
 							if (handle.getTag() == Opcodes.H_INVOKESTATIC && handle.getOwner().equals(RemappingUtils.getClassName("class_309")) && (handle.getDesc().equals(targetDescC) || handle.getDesc().equals(targetDescI))) {
+								idin.desc = idin.desc.replace("L" + RemappingUtils.getClassName("class_437") + ";", "L" + RemappingUtils.getClassName("class_364") + ";");
 								idin.bsmArgs[1] = new Handle(handle.getTag(), handle.getOwner(), handle.getName(), handle.getDesc().replace("L" + RemappingUtils.getClassName("class_437") + ";", "L" + RemappingUtils.getClassName("class_364") + ";"), handle.isInterface());
 							}
 						}
