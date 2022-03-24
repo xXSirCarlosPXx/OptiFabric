@@ -4,7 +4,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.Keyboard;
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 
 import me.modmuss50.optifabric.compat.InterceptingMixin;

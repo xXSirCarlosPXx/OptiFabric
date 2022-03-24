@@ -421,6 +421,10 @@ public class OptifabricSetup implements Runnable {
 				Mixins.addConfiguration("optifabric.compat.replaymod.mixins.json");
 			}
 		}
+
+		if (isPresent("zoomify")) {
+			Mixins.addConfiguration("optifabric.compat.zoomify.mixins.json");
+		}
 	}
 
 	private static boolean isPresent(String modID) {
