@@ -224,7 +224,12 @@ public class OptifabricSetup implements Runnable {
 			});
 		}
 
-		if (isPresent("apoli")) {
+
+		if (isPresent("apoli", ">=2.2.2")) {
+			Mixins.addConfiguration("optifabric.compat.apoli-newer.mixins.json");
+		} else if (isPresent("apoli", ">=2.0")) {
+			Mixins.addConfiguration("optifabric.compat.apoli-new.mixins.json");
+		} else if (isPresent("apoli")) {
 			Mixins.addConfiguration("optifabric.compat.apoli.mixins.json");
 		}
 
