@@ -177,6 +177,8 @@ public class OptifabricSetup implements Runnable {
 
 		if (isPresent("fabric-lifecycle-events-v1", ">=1.4.6") && isPresent("minecraft", "1.17.x")) {
 			Mixins.addConfiguration("optifabric.compat.fabric-lifecycle-events.mixins.json");
+		} else if (isPresent("fabric-lifecycle-events-v1", ">=2.0.8")) {
+			Mixins.addConfiguration("optifabric.compat.fabric-lifecycle-events.new-mixins.json");
 		}
 
 		Mixins.addConfiguration("optifabric.optifine.mixins.json");

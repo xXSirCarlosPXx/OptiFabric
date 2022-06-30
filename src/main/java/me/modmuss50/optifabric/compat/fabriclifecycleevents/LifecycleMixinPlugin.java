@@ -17,7 +17,9 @@ import me.modmuss50.optifabric.util.RemappingUtils;
 public class LifecycleMixinPlugin extends InterceptingMixinPlugin {
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		if ("ClientChunkManagerMixin".equals(mixinInfo.getName())) {
+		switch (mixinInfo.getName()) {
+		case "ClientChunkManagerMixin":
+		case "ClientChunkManagerNewMixin": {
 			String loadChunkFromPacketDesc = getLoadChunkFromPacketDesc();
 			String loadChunkFromPacket = RemappingUtils.getMethodName("class_631", "method_16020", loadChunkFromPacketDesc); //(BiomeArray, PacketByteBuf, NbtCompound)WorldChunk
 			loadChunkFromPacketDesc = RemappingUtils.mapMethodDescriptor(loadChunkFromPacketDesc);
@@ -42,6 +44,8 @@ public class LifecycleMixinPlugin extends InterceptingMixinPlugin {
 					break;
 				}
 			}
+			break;
+		}
 		}
 
 		super.preApply(targetClassName, targetClass, mixinClassName, mixinInfo);
