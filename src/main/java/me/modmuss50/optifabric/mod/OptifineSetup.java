@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -55,6 +56,7 @@ import me.modmuss50.optifabric.util.ZipUtils.ZipTransformer;
 import me.modmuss50.optifabric.util.ZipUtils.ZipVisitor;
 
 public class OptifineSetup {
+	@SuppressWarnings("unchecked")
 	public static Pair<File, ClassCache> getRuntime() throws IOException {
 		@SuppressWarnings("deprecation") //Keeping backward compatibility with older Loader versions
 		File workingDir = new File(FabricLoader.getInstance().getGameDirectory(), ".optifine");
@@ -164,14 +166,20 @@ public class OptifineSetup {
 		File completeJar = new File(workDir, "Optifine-remapped.jar");
 		remapOptifine(jarOfTheFree, getLibs(minecraftJar), completeJar, createMappings("official", namespace, rebuilder));
 
+		for (UnaryOperator<File> transformer : FabricLoader.getInstance().getEntrypoints("optifabric:transformer", UnaryOperator.class)) {
+			completeJar = transformer.apply(completeJar);
+			if (completeJar == null || !completeJar.canRead()) throw new IllegalStateException("Jar transformer returned invalid jar: " + completeJar);
+		}
+		File completedJar = completeJar;
+
 		Consumer<ZipVisitor> jarFinaliser;
 		if (remappedJar.exists() && !remappedJar.delete()) {
 			System.err.println("Failed to clear " + remappedJar + ", is another instance of the game running?");
-			remappedJar = completeJar;
-			jarFinaliser = visitor -> ZipUtils.filterInPlace(completeJar, visitor);
+			remappedJar = completedJar;
+			jarFinaliser = visitor -> ZipUtils.filterInPlace(completedJar, visitor);
 		} else {
 			final File finalRemappedJar = remappedJar; //It's final in this code path... but javac knows it's not final everywhere
-			jarFinaliser = visitor -> ZipUtils.filter(completeJar, visitor, finalRemappedJar);
+			jarFinaliser = visitor -> ZipUtils.filter(completedJar, visitor, finalRemappedJar);
 		}
 		if (optifinePatches.exists() && !optifinePatches.delete()) {
 			System.err.println("Failed to clear " + optifinePatches + ", is another instance of the game running?");
@@ -189,7 +197,7 @@ public class OptifineSetup {
 			if(optifineClasses.exists()){
 				FileUtils.deleteDirectory(optifineClasses);
 			}
-			ZipUtils.extract(completeJar, optifineClasses);
+			ZipUtils.extract(completedJar, optifineClasses);
 		}
 
 		return Pair.of(remappedJar, generateClassCache(jarFinaliser, optifinePatches, modHash, extract));
