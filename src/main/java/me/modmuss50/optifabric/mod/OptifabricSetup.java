@@ -17,7 +17,10 @@ import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import org.spongepowered.asm.mixin.FabricUtil;
 import org.spongepowered.asm.mixin.Mixins;
+import org.spongepowered.asm.mixin.extensibility.IMixinConfig;
+import org.spongepowered.asm.mixin.transformer.Config;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -429,6 +432,19 @@ public class OptifabricSetup implements Runnable {
 
 		if (isPresent("zoomify")) {
 			Mixins.addConfiguration("optifabric.compat.zoomify.mixins.json");
+		}
+
+		if (isPresent("fabricloader", ">=0.12.3")) {
+			for (Config config : Mixins.getConfigs()) {
+				if (config.getName().startsWith("optifabric.")) {
+					IMixinConfig settings = config.getConfig();
+
+					if (!settings.hasDecoration(FabricUtil.KEY_MOD_ID)) {
+						settings.decorate(FabricUtil.KEY_MOD_ID, "optifabric");
+						settings.decorate(FabricUtil.KEY_COMPATIBILITY, FabricUtil.COMPATIBILITY_0_9_2);
+					}
+				}
+			}
 		}
 	}
 
