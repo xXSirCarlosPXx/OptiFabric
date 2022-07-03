@@ -13,6 +13,16 @@ public class RemappingUtils {
 	private static final String INTERMEDIARY = "intermediary";
 	private static final Pattern CLASS_FINDER = Pattern.compile("Lnet\\/minecraft\\/([^;]+);");
 
+	public static boolean hasClassName(String className) {
+		if (!INTERMEDIARY.equals(RESOLVER.getCurrentRuntimeNamespace())) {
+			className = fromIntermediaryDot(className);
+		} else {
+			className = "net.minecraft.".concat(className);
+		}
+
+		return !className.equals(RESOLVER.unmapClassName("official", className));
+	}
+
 	public static String getClassName(String className) {
 		return fromIntermediaryDot(className).replace('.', '/');
 	}

@@ -15,7 +15,6 @@ import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
@@ -26,6 +25,7 @@ import me.modmuss50.optifabric.compat.fabricscreenapi.Events;
 import me.modmuss50.optifabric.mod.OptifabricError;
 import me.modmuss50.optifabric.mod.OptifabricSetup;
 import me.modmuss50.optifabric.mod.OptifineVersion;
+import me.modmuss50.optifabric.mod.Text;
 
 @Mixin(TitleScreen.class)
 public abstract class MixinTitleScreen extends Screen {
@@ -85,8 +85,8 @@ public abstract class MixinTitleScreen extends Screen {
 			}
 			}
 
-			client.openScreen(new ConfirmScreen(action, new LiteralText("There was an error loading OptiFabric!").formatted(Formatting.RED),
-					new LiteralText(OptifabricError.getError()), new LiteralText(helpButtonText).formatted(Formatting.GREEN), new LiteralText(actionButtonText)));
+			client.openScreen(new ConfirmScreen(action, Text.literal("There was an error loading OptiFabric!", Formatting.RED),
+					Text.literal(OptifabricError.getError()), Text.literal(helpButtonText, Formatting.GREEN), Text.literal(actionButtonText)));
 		}
 	}
 

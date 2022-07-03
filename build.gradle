@@ -63,6 +63,10 @@ compileJava {
 		classes += ['net/minecraft/world/HeightLimitView': 'net/minecraft/class_5539']
 		method 'net/minecraft/util/crash/CrashReportSection', '(Lnet/minecraft/util/crash/CrashReportSection;Lnet/minecraft/world/HeightLimitView;' + 
 		'Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V', 'addBlockInfo', 'method_586'
+		classes += ['net/minecraft/util/math/random/Random': 'net/minecraft/class_5819',
+					'net/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk$RebuildTask$RenderData' : 'net/minecraft/class_846$class_851$class_4578$class_7435']
+		method 'net/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk$RebuildTask', '(FFFLnet/minecraft/client/render/chunk/BlockBufferBuilderStorage;)' + 
+				'Lnet/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk$RebuildTask$RenderData;', 'render', 'method_22785'
 	}
 }
 

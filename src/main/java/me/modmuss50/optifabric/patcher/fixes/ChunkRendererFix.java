@@ -1,6 +1,7 @@
 package me.modmuss50.optifabric.patcher.fixes;
 
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -29,14 +30,18 @@ public class ChunkRendererFix implements ClassFixer {
 							class_1920 - net/minecraft/world/ExtendedBlockView
 							class_4587 - net/minecraft/client/util/math/MatrixStack
 							class_4588 - net/minecraft/client/render/VertexConsumer
+							class_5819 - net/minecraft/util/math/random/Random
 							 */
 
+							Type[] args = Type.getArgumentTypes(methodInsnNode.desc);
+							assert args.length > 3 && "Z".equals(args[args.length - 3].getDescriptor());
+							boolean nativeRandom = "java/util/Random".equals(args[args.length - 2].getInternalName());
 							String desc = "(Lnet/minecraft/class_2680;"
 								+ "Lnet/minecraft/class_2338;"
 								+ "Lnet/minecraft/class_1920;"
 								+ "Lnet/minecraft/class_4587;"
 								+ "Lnet/minecraft/class_4588;"
-								+ "ZLjava/util/Random;)Z";
+								+ "ZL" + (!nativeRandom ? RemappingUtils.getClassName("class_5819") + ";)V" : "java/util/Random;)Z");
 							String name = RemappingUtils.getMethodName("class_776", "method_3355", desc);
 
 							System.out.println(String.format("Replacement `renderBlock` call:  %s.%s", name, desc));

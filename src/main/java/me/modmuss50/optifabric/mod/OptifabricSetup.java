@@ -143,19 +143,23 @@ public class OptifabricSetup implements Runnable {
 		}
 
 		if (isPresent("fabric-renderer-indigo")) {
-			Mixins.addConfiguration("optifabric.compat.indigo.mixins.json");
+			if (isPresent("minecraft", ">=1.19")) {
+				Mixins.addConfiguration("optifabric.compat.indigo.new-mixins.json");
+			} else {
+				Mixins.addConfiguration("optifabric.compat.indigo.mixins.json");
 
-			injector.predictFuture(RemappingUtils.getClassName("class_846$class_849")).ifPresent(node -> {//ChunkBuilder$ChunkData
-				String nonEmptyLayers = RemappingUtils.mapFieldName("class_846$class_849", "field_4450", "Ljava/util/Set;");
+				injector.predictFuture(RemappingUtils.getClassName("class_846$class_849")).ifPresent(node -> {//ChunkBuilder$ChunkData
+					String nonEmptyLayers = RemappingUtils.mapFieldName("class_846$class_849", "field_4450", "Ljava/util/Set;");
 
-				for (FieldNode field : node.fields) {
-					if (nonEmptyLayers.equals(field.name) && "Ljava/util/Set;".equals(field.desc)) {
-						return;
+					for (FieldNode field : node.fields) {
+						if (nonEmptyLayers.equals(field.name) && "Ljava/util/Set;".equals(field.desc)) {
+							return;
+						}
 					}
-				}
 
-				Mixins.addConfiguration("optifabric.compat.indigo.extra-mixins.json");
-			});
+					Mixins.addConfiguration("optifabric.compat.indigo.extra-mixins.json");
+				});
+			}
 		}
 
 		if (isPresent("fabric-item-api-v1", ">=1.1.0") && isPresent("minecraft", "1.16.x")) {
@@ -454,7 +458,7 @@ public class OptifabricSetup implements Runnable {
 		return FabricLoader.getInstance().isModLoaded(modID);
 	}
 
-	private static boolean isPresent(String modID, String versionRange) {
+	static boolean isPresent(String modID, String versionRange) {
 		return isPresent(modID, modMetadata -> compareVersions(versionRange, modMetadata));
 	}
 

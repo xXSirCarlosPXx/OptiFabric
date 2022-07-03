@@ -3,12 +3,16 @@ package me.modmuss50.optifabric.compat.fabricrendererapi.mixin;
 import java.util.Random;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import net.minecraft.class_5819;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.BlockModelRenderer;
@@ -22,6 +26,8 @@ import net.minecraft.world.BlockRenderView;
 
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 
+import me.modmuss50.optifabric.compat.LoudCoerce;
+
 @Mixin(BlockModelRenderer.class)
 abstract class BlockModelRendererMixin {
 	@Inject(method = {"renderModel", "tesselateBlock"}, remap = false, locals = LocalCapture.CAPTURE_FAILSOFT,
@@ -30,6 +36,18 @@ abstract class BlockModelRendererMixin {
 	private void addInfo(BlockRenderView world, BakedModel model, BlockState state, BlockPos pos, MatrixStack matrix, VertexConsumer vertexConsumer, boolean cull,
 						Random random, long seed, int overlay, @Coerce Object modelData, CallbackInfoReturnable<Boolean> call, boolean useAO, Vec3d modelOffset,
 						Throwable t, CrashReport crash, CrashReportSection modelInfo) {
+		addCrashInfo(model, modelInfo);
+	}
+
+	@Surrogate
+	private void addInfo(BlockRenderView world, BakedModel model, BlockState state, BlockPos pos, MatrixStack matrix, VertexConsumer vertexConsumer, boolean cull,
+						class_5819 random, long seed, int overlay, @LoudCoerce(value="net/minecraftforge/client/model/data/IModelData", remap=false) Object modelData,
+						CallbackInfo call, boolean useAO, Vec3d modelOffset, Throwable t, CrashReport crash, CrashReportSection modelInfo) {
+		addCrashInfo(model, modelInfo);
+	}
+
+	@Unique
+	private void addCrashInfo(BakedModel model, CrashReportSection modelInfo) {
 		boolean isFabricModel = model instanceof FabricBakedModel;
 
 		modelInfo.add("Model class", model != null ? model.getClass().getName() : model);
