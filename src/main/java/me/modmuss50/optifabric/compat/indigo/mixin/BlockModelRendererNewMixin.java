@@ -22,7 +22,7 @@ import me.modmuss50.optifabric.compat.Shim;
 @InterceptingMixin("net/fabricmc/fabric/mixin/client/indigo/renderer/MixinBlockModelRenderer")
 abstract class BlockModelRendererNewMixin {
 	@Inject(at = @At("HEAD"),
-			method = "renderModel", remap = false,
+			method = {"renderModel", "tesselateBlock"}, remap = false,
 			cancellable = true)
 	private void hookRender(BlockRenderView blockView, BakedModel model, BlockState state, BlockPos pos, MatrixStack matrix, VertexConsumer buffer, boolean checkSides, class_5819 rand, long seed, int overlay, @Coerce Object modelData, CallbackInfo call) {
 		hookRender(blockView, model, state, pos, matrix, buffer, checkSides, rand, seed, overlay, call);

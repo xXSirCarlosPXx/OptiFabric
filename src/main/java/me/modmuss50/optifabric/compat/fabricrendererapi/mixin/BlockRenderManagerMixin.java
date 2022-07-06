@@ -36,18 +36,6 @@ abstract class BlockRenderManagerMixin {
 			})
 	private void addInfo(BlockState state, BlockPos pos, BlockRenderView world, MatrixStack matrix, VertexConsumer vertexConsumer, boolean cull, Random random,
 							@Coerce Object modelData, CallbackInfoReturnable<Boolean> call, Throwable t, CrashReport crash, CrashReportSection blockInfo) {
-		addCrashInfo(state, blockInfo);
-	}
-
-	@Surrogate
-	private void addInfo(BlockState state, BlockPos pos, BlockRenderView world, MatrixStack matrix, VertexConsumer vertexConsumer, boolean cull, class_5819 random,
-							@LoudCoerce(value="net/minecraftforge/client/model/data/IModelData", remap=false) Object modelData, CallbackInfo call,
-							Throwable t, CrashReport crash, CrashReportSection blockInfo) {
-		addCrashInfo(state, blockInfo);
-	}
-
-	@Unique
-	private void addCrashInfo(BlockState state, CrashReportSection blockInfo) {
 		blockInfo.add("Block render type", state.getRenderType());
 	}
 }

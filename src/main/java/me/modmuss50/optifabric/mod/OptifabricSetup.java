@@ -103,7 +103,11 @@ public class OptifabricSetup implements Runnable {
 		};
 
 		if (isPresent("fabric-renderer-api-v1")) {
-			Mixins.addConfiguration("optifabric.compat.fabric-renderer-api.mixins.json");
+			if (isPresent("minecraft", ">=1.19")) {
+				Mixins.addConfiguration("optifabric.compat.fabric-renderer-api.new-mixins.json");
+			} else {
+				Mixins.addConfiguration("optifabric.compat.fabric-renderer-api.mixins.json");
+			}
 		}
 
 		if (isPresent("fabric-rendering-v1", ">=1.5.0") && particlesPresent.getAsBoolean()) {
