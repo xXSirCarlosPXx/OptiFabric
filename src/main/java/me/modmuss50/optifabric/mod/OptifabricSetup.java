@@ -304,7 +304,7 @@ public class OptifabricSetup implements Runnable {
 
 		if (isPresent("charm", ">=2.0 <2.1")) {
 			Mixins.addConfiguration("optifabric.compat.charm-older.mixins.json");
-		} else if (isPresent("charm", ">=2.1  <3.0")) {
+		} else if (isPresent("charm", ">=2.1 <3.0")) {
 			Mixins.addConfiguration("optifabric.compat.charm-old.mixins.json");
 
 			if (isPresent("charm", ">=2.2.2")) {
@@ -320,8 +320,10 @@ public class OptifabricSetup implements Runnable {
 					}
 				});
 			}	
-		} else if (isPresent("charm", ">=3.0")) {
+		} else if (isPresent("charm", ">=3.0 <4.0")) {
 			Mixins.addConfiguration("optifabric.compat.charm.mixins.json");
+		} else if (isPresent("charm", ">=4.0")) {
+			Mixins.addConfiguration("optifabric.compat.charm-new.mixins.json");
 		}
 
 		if (isPresent("voxelmap")) {
