@@ -101,6 +101,23 @@ public class OptifabricSetup implements Runnable {
 				}).isPresent();
 			}
 		};
+		BooleanSupplier setupFogPresent = new FeatureFinder() {
+			@Override
+			protected boolean isPresent() {
+				return injector.predictFuture(RemappingUtils.getClassName("class_758")).filter(node -> {//BackgroundRenderer
+					//(Camera, BackgroundRenderer$FogType)
+					String desc = RemappingUtils.mapMethodDescriptor("(Lnet/minecraft/class_4184;Lnet/minecraft/class_758$class_4596;FZF)V");
+
+					for (MethodNode method : node.methods) {
+						if ("setupFog".equals(method.name) && desc.equals(method.desc)) {
+							return true;
+						}
+					}
+
+					return false;
+				}).isPresent();
+			}
+		};
 
 		if (isPresent("fabric-renderer-api-v1")) {
 			if (isPresent("minecraft", ">=1.19")) {
@@ -444,6 +461,10 @@ public class OptifabricSetup implements Runnable {
 
 		if (isPresent("zoomify")) {
 			Mixins.addConfiguration("optifabric.compat.zoomify.mixins.json");
+		}
+
+		if (isPresent("borderlessmining", ">=1.1.3")) {
+			Mixins.addConfiguration("optifabric.compat.borderlessmining.mixins.json");
 		}
 
 		if (isPresent("fabricloader", ">=0.12.3")) {

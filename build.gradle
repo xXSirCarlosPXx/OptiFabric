@@ -67,6 +67,7 @@ compileJava {
 					'net/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk$RebuildTask$RenderData' : 'net/minecraft/class_846$class_851$class_4578$class_7435']
 		method 'net/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk$RebuildTask', '(FFFLnet/minecraft/client/render/chunk/BlockBufferBuilderStorage;)' + 
 				'Lnet/minecraft/client/render/chunk/ChunkBuilder$BuiltChunk$RebuildTask$RenderData;', 'render', 'method_22785'
+		classes += ['net/minecraft/class_7172', 'net/minecraft/class_7172$class_7307', 'net/minecraft/class_7172$class_7303', 'net/minecraft/class_7172$class_7178'].collectEntries{[it, it]}
 	}
 }
 
