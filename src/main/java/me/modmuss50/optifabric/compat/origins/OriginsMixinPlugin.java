@@ -46,7 +46,8 @@ public class OriginsMixinPlugin extends InterceptingMixinPlugin {
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
 		switch (mixinInfo.getName()) {
 			case "BackgroundRendererMixin":
-			case "BackgroundRendererNewMixin": {
+			case "BackgroundRendererNewMixin":
+			case "BackgroundRendererNewerMixin": {
 				String renderDesc = "(Lnet/minecraft/class_4184;FLnet/minecraft/class_638;IF)V"; //(Camera, ClientWorld)
 				String render = RemappingUtils.getMethodName("class_758", "method_3210", renderDesc); //BackgroundRenderer, render
 				renderDesc = RemappingUtils.mapMethodDescriptor(renderDesc);
@@ -77,6 +78,8 @@ public class OriginsMixinPlugin extends InterceptingMixinPlugin {
 						method.localVariables.add(new LocalVariableNode("fakeFogType", "L" + RemappingUtils.getClassName("class_5636") + ";", null, fakeStart2, skip, 7));
 					} else if (applyFog.equals(method.name)) {
 						LabelNode fogTypeStart = new LabelNode();
+						LabelNode fogFloatStart = new LabelNode();
+						LabelNode fogFloat2Start = new LabelNode();
 						LabelNode skip = new LabelNode();
 
 						InsnList extra = new InsnList();
@@ -86,6 +89,12 @@ public class OriginsMixinPlugin extends InterceptingMixinPlugin {
 						extra.add(fogTypeStart);
 						addFocusedEntity(extra, getFocusedEntity);
 						extra.add(new InsnNode(Opcodes.POP2));
+						extra.add(new InsnNode(Opcodes.FCONST_0));
+						extra.add(new VarInsnNode(Opcodes.FSTORE, 5));
+						extra.add(fogFloatStart);
+						extra.add(new InsnNode(Opcodes.FCONST_0));
+						extra.add(new VarInsnNode(Opcodes.FSTORE, 6));
+						extra.add(fogFloat2Start);
 						extra.add(new InsnNode(Opcodes.FCONST_0));
 						extra.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/mojang/blaze3d/systems/RenderSystem", fogStart(), "(F)V", false));
 						extra.add(new InsnNode(Opcodes.FCONST_1));
@@ -99,7 +108,9 @@ public class OriginsMixinPlugin extends InterceptingMixinPlugin {
 
 						method.instructions.insertBefore(method.instructions.getLast(), extra);
 						method.localVariables.add(new LocalVariableNode("fakeFogType", "L" + RemappingUtils.getClassName("class_5636") + ";", null, fogTypeStart, skip, 4));
-						method.maxLocals += 1;
+						method.localVariables.add(new LocalVariableNode("fakeF", "F", null, fogFloatStart, skip, 5));
+						method.localVariables.add(new LocalVariableNode("fakeF2", "F", null, fogFloat2Start, skip, 6));
+						method.maxLocals += 3;
 					} else if (method.name.equals("setupFog") && method.desc.equals(RemappingUtils.mapMethodDescriptor("(Lnet/minecraft/class_4184;Lnet/minecraft/class_758$class_4596;FZF)V"))) {
 						// Not sure if this is a good solution, may break in the future
 						// See https://github.com/Chocohead/OptiFabric/pull/630#issuecomment-1076728336

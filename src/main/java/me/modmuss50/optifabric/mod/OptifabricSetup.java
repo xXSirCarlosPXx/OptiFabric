@@ -255,12 +255,22 @@ public class OptifabricSetup implements Runnable {
 		}
 
 
-		if (isPresent("apoli", ">=2.2.2")) {
+		if (isPresent("apoli", ">=2.3.1")) {
+			Mixins.addConfiguration("optifabric.compat.apoli-newerer.mixins.json");
+
+			if (setupFogPresent.getAsBoolean()) {
+				Mixins.addConfiguration("optifabric.compat.apoli-newerer.extra-mixins.json");
+			}
+		} else if (isPresent("apoli", ">=2.2.2")) {
 			Mixins.addConfiguration("optifabric.compat.apoli-newer.mixins.json");
 		} else if (isPresent("apoli", ">=2.0")) {
 			Mixins.addConfiguration("optifabric.compat.apoli-new.mixins.json");
 		} else if (isPresent("apoli")) {
 			Mixins.addConfiguration("optifabric.compat.apoli.mixins.json");
+		}
+
+		if (isPresent("additionalentityattributes") && setupFogPresent.getAsBoolean()) {
+			Mixins.addConfiguration("optifabric.compat.additional-entity-attributes.mixins.json");
 		}
 
 		if (isPresent("staffofbuilding")) {
