@@ -1,5 +1,7 @@
 package me.modmuss50.optifabric.patcher.fixes;
 
+import java.util.ListIterator;
+
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -15,8 +17,8 @@ public class ChunkRendererFix implements ClassFixer {
 	@Override
 	public void fix(ClassNode classNode, ClassNode old) {
 		for (MethodNode methodNode : classNode.methods) {
-			for (int i = 0; i < methodNode.instructions.size(); i++) {
-				AbstractInsnNode insnNode = methodNode.instructions.get(i);
+			for (ListIterator<AbstractInsnNode> it = methodNode.instructions.iterator(); it.hasNext();) {
+				AbstractInsnNode insnNode = it.next();
 
 				if (insnNode instanceof MethodInsnNode) {
 					MethodInsnNode methodInsnNode = (MethodInsnNode) insnNode;
@@ -34,8 +36,9 @@ public class ChunkRendererFix implements ClassFixer {
 							 */
 
 							Type[] args = Type.getArgumentTypes(methodInsnNode.desc);
-							assert args.length > 3 && "Z".equals(args[args.length - 3].getDescriptor());
-							boolean nativeRandom = "java/util/Random".equals(args[args.length - 2].getInternalName());
+							boolean trailingRenderLayer = RemappingUtils.getClassName("class_1921").equals(args[args.length - 1].getInternalName());
+							assert args.length > (trailingRenderLayer ? 4 : 3) && "Z".equals(args[args.length - (trailingRenderLayer ? 4 : 3)].getDescriptor());
+							boolean nativeRandom = "java/util/Random".equals(args[args.length - (trailingRenderLayer ? 3 : 2)].getInternalName());
 							String desc = "(Lnet/minecraft/class_2680;"
 								+ "Lnet/minecraft/class_2338;"
 								+ "Lnet/minecraft/class_1920;"
@@ -50,8 +53,15 @@ public class ChunkRendererFix implements ClassFixer {
 							methodInsnNode.name = name;
 							methodInsnNode.desc = RemappingUtils.mapMethodDescriptor(desc);
 
+							it.previous();
 							//Remove the model data local load call
-							methodNode.instructions.remove(methodNode.instructions.get(i - 1));
+							it.previous();
+							it.remove();
+							if (trailingRenderLayer) {//Remove the additional render layer
+								it.previous();
+								it.remove();
+							}
+							it.next();
 						}
 					}
 				}
