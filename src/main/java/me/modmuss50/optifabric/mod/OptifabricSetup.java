@@ -288,10 +288,12 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.staffofbuilding.mixins.json");
 		}
 
-		if (isPresent("sandwichable", ">=1.2-alpha1")) {
+		if (isPresent("sandwichable", "<=1.2-rc4 >=1.2-alpha1")) {
 			Mixins.addConfiguration("optifabric.compat.sandwichable.mixins.json");
-		} else if (isPresent("sandwichable")) {
+		} else if (isPresent("sandwichable", "<1.2-alpha1")) {
 			Mixins.addConfiguration("optifabric.compat.sandwichable-old.mixins.json");
+		} else {//1.3.a isn't SemVer, so won't hit either case above anyway
+			Mixins.addConfiguration("optifabric.compat.sandwichable.new-mixins.json");
 		}
 
 		if (isPresent("astromine", "<1.6")) {//Only needed for the 1.16.1 versions

@@ -19,7 +19,10 @@ import me.modmuss50.optifabric.util.RemappingUtils;
 public class SandwichableMixinPlugin extends InterceptingMixinPlugin {
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		if (mixinInfo.getName().endsWith("BuiltinModelItemRendererMixin")) {//ItemBlock, getBlock, ()Block
+		switch (mixinInfo.getName()) {
+		case "old.BuiltinModelItemRendererMixin":
+		case "BuiltinModelItemRendererMixin":
+		case "BuiltinModelItemRendererNewMixin": {//ItemBlock, getBlock, ()Block
 			Member getBlock = RemappingUtils.mapMethod("class_1747", "method_7711", "()Lnet/minecraft/class_2248;");
 			//BuiltinModelItemRenderer, render, (ItemStack, ModelTransformation$Mode, MatrixStack, VertexConsumerProvider)
 			String render = RemappingUtils.getMethodName("class_756", "method_3166",
@@ -39,6 +42,8 @@ public class SandwichableMixinPlugin extends InterceptingMixinPlugin {
 					method.instructions.insertBefore(method.instructions.getLast(), extra);
 				}
 			}
+			break;
+		}
 		}
 
 		super.preApply(targetClassName, targetClass, mixinClassName, mixinInfo);
