@@ -439,8 +439,12 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.smooth-chunks.mixins.json");
 		}
 
-		if (isPresent("enhancedcelestials")) {
-			Mixins.addConfiguration("optifabric.compat.enhancedcelestials.mixins.json");
+		if (isPresent("enhancedcelestials") && isPresent("minecraft", "<1.19")) {
+			if (isPresent("enhancedcelestials", ">=2.0.0")) {
+				Mixins.addConfiguration("optifabric.compat.enhancedcelestials.new-mixins.json");
+			} else {
+				Mixins.addConfiguration("optifabric.compat.enhancedcelestials.mixins.json");
+			}
 		}
 
 		if (isPresent("cullparticles") && particlesPresent.getAsBoolean()) {
