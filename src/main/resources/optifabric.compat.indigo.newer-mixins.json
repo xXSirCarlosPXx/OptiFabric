@@ -5,6 +5,7 @@
 	"mixins": [
 		"RebuildTaskNewerMixin",
 		"ChunkCacheOFAccess",
+		"ChunkCacheOFNewMixin",
 		"BlockModelRendererNewMixin"
 	]
 }
