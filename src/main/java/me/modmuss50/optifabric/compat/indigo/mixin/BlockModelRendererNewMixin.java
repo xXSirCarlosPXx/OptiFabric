@@ -21,7 +21,7 @@ import me.modmuss50.optifabric.compat.InterceptingMixin;
 import me.modmuss50.optifabric.compat.Shim;
 
 @Mixin(BlockModelRenderer.class)
-@InterceptingMixin("net/fabricmc/fabric/mixin/client/indigo/renderer/MixinBlockModelRenderer")
+@InterceptingMixin({"net/fabricmc/fabric/mixin/client/indigo/renderer/MixinBlockModelRenderer", "net/fabricmc/fabric/mixin/client/indigo/renderer/BlockModelRendererMixin"})
 abstract class BlockModelRendererNewMixin {
 	@Group(min = 1, max = 1)
 	@Inject(at = @At("HEAD"),

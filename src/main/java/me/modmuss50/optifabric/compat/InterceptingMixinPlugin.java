@@ -1,6 +1,7 @@
 package me.modmuss50.optifabric.compat;
 
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableSet;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -54,7 +56,7 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 		AnnotationNode interception = Annotations.getInvisible(thisMixin, InterceptingMixin.class);
 		if (interception == null) return; //Nothing to do for this particular Mixin
 
-		Mixin interceptionMixin = findMixin(targetClassName, Annotations.getValue(interception));
+		Mixin interceptionMixin = findMixin(targetClassName, Annotations.getValue(interception, "value", true));
 		on: for (MethodNode method : thisMixin.methods) {
 			AnnotationNode surrogateNode = Annotations.getInvisible(method, PlacatingSurrogate.class);
 
@@ -80,14 +82,16 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 		}
 	}
 
-	private static Mixin findMixin(String targetClass, String mixinTarget) {
+	private static Mixin findMixin(String targetClass, Collection<String> mixinTargets) {
+		mixinTargets = ImmutableSet.copyOf(mixinTargets);
+
 		for (Mixin mixin : MixinUtils.getMixinsFor(targetClass)) {
-			if (mixinTarget.equals(mixin.getName())) {
+			if (mixinTargets.contains(mixin.getName())) {
 				return mixin;
 			}
 		}
 
-		throw new IllegalArgumentException("Can't find Mixin class " + mixinTarget + " targetting " + targetClass);
+		throw new IllegalArgumentException("Can't find Mixin class" + (mixinTargets.size() != 1 ? "es " : ' ') + String.join(", ", mixinTargets) + " targetting " + targetClass);
 	}
 
 	protected static String coerceDesc(MethodNode method) {
@@ -123,7 +127,7 @@ public class InterceptingMixinPlugin extends EmptyMixinPlugin {
 		AnnotationNode interception = Annotations.getInvisible(thisMixin, InterceptingMixin.class);
 		if (interception == null) return; //Nothing to do for this particular Mixin
 
-		Mixin interceptionMixin = findMixin(targetClassName, Annotations.getValue(interception));
+		Mixin interceptionMixin = findMixin(targetClassName, Annotations.getValue(interception, "value", true));
 		Map<String, Method> shims = thisMixin.methods.stream().filter(method -> Annotations.getInvisible(method, Shim.class) != null).collect(Collectors.toMap(method -> method.name.concat(method.desc), method -> {
 			Method realMethod = interceptionMixin.getMethod(method.name, MoreObjects.firstNonNull(coerceDesc(method), method.desc));
 

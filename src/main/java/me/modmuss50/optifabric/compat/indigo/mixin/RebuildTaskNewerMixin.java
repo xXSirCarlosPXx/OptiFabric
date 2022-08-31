@@ -28,7 +28,7 @@ import me.modmuss50.optifabric.compat.PlacatingSurrogate;
 import me.modmuss50.optifabric.compat.Shim;
 
 @Mixin(targets = "net.minecraft.client.render.chunk.ChunkBuilder$BuiltChunk$RebuildTask")
-@InterceptingMixin("net/fabricmc/fabric/mixin/client/indigo/renderer/MixinChunkRebuildTask")
+@InterceptingMixin({"net/fabricmc/fabric/mixin/client/indigo/renderer/MixinChunkRebuildTask", "net/fabricmc/fabric/mixin/client/indigo/renderer/ChunkBuilderBuiltChunkRebuildTaskMixin"})
 abstract class RebuildTaskNewerMixin {
 	@Shadow
 	protected BuiltChunk field_20839;

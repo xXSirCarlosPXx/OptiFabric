@@ -11,7 +11,7 @@ import me.modmuss50.optifabric.compat.InterceptingMixin;
 import me.modmuss50.optifabric.compat.Shim;
 
 @Mixin(WorldRenderer.class)
-@InterceptingMixin("net/fabricmc/fabric/mixin/client/rendering/MixinWorldRenderer")
+@InterceptingMixin({"net/fabricmc/fabric/mixin/client/rendering/MixinWorldRenderer", "net/fabricmc/fabric/mixin/client/rendering/WorldRendererMixin"})
 abstract class WorldRendererMixin {
 	@Inject(method = "render", require = 2,
 			at = {@At(value = "INVOKE", 

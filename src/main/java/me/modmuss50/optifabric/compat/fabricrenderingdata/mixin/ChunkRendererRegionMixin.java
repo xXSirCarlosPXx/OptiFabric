@@ -16,7 +16,7 @@ import me.modmuss50.optifabric.compat.PlacatingSurrogate;
 import me.modmuss50.optifabric.compat.Shim;
 
 @Mixin(ChunkRendererRegion.class)
-@InterceptingMixin("net/fabricmc/fabric/mixin/rendering/data/attachment/client/MixinChunkRendererRegion")
+@InterceptingMixin({"net/fabricmc/fabric/mixin/rendering/data/attachment/client/MixinChunkRendererRegion", "net/fabricmc/fabric/mixin/rendering/data/attachment/client/ChunkRendererRegionMixin"})
 abstract class ChunkRendererRegionMixin {
 	@PlacatingSurrogate
 	private static void init(World world, BlockPos startPos, BlockPos endPos, int chunkRadius, CallbackInfoReturnable<ChunkRendererRegion> call) {
