@@ -4,7 +4,6 @@
 	"mixins": [
 		"MixinReflectorClass",
 		"MixinOptifineConfig",
-		"MixinDefaultResourcePack",
 		"CustomColoursMixin",
 		"ShadersMixin",
 		"VideoOptionsScreenMixin",
