@@ -18,10 +18,12 @@ import me.modmuss50.optifabric.util.RemappingUtils;
 public class RenderingMixinPlugin extends InterceptingMixinPlugin {
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		if ("WorldRendererMixin".equals(mixinInfo.getName())) {
+		switch (mixinInfo.getName()) {
+		case "WorldRendererMixin":
+		case "WorldRendererNewMixin": {
 			Member renderParticles = RemappingUtils.mapMethod("class_702", "method_3049", //ParticleManager, renderParticles
 												"(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597$class_4598;Lnet/minecraft/class_765;Lnet/minecraft/class_4184;F)V");
-			String renderDesc = "(Lnet/minecraft/class_4587;FJZLnet/minecraft/class_4184;Lnet/minecraft/class_757;Lnet/minecraft/class_765;Lnet/minecraft/class_1159;)V";
+			String renderDesc = getRenderDesc();
 			String render = RemappingUtils.getMethodName("class_761", "method_22710", renderDesc); //(MatrixStack, Camera, GameRenderer, LightmapTextureManager, Matrix4f)
 			renderDesc = RemappingUtils.mapMethodDescriptor(renderDesc);
 
@@ -39,7 +41,12 @@ public class RenderingMixinPlugin extends InterceptingMixinPlugin {
 				}
 			}
 		}
+		}
 
 		super.preApply(targetClassName, targetClass, mixinClassName, mixinInfo);
+	}
+
+	protected String getRenderDesc() {
+		return "(Lnet/minecraft/class_4587;FJZLnet/minecraft/class_4184;Lnet/minecraft/class_757;Lnet/minecraft/class_765;Lnet/minecraft/class_1159;)V";
 	}
 }

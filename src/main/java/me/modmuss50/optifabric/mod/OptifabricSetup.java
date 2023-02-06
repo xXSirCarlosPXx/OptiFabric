@@ -128,7 +128,11 @@ public class OptifabricSetup implements Runnable {
 		}
 
 		if (isPresent("fabric-rendering-v1", ">=1.5.0") && particlesPresent.getAsBoolean()) {
-			Mixins.addConfiguration("optifabric.compat.fabric-rendering.mixins.json");
+			if (isPresent("minecraft", ">=1.19.3")) {
+				Mixins.addConfiguration("optifabric.compat.fabric-rendering.new-mixins.json");
+			} else {
+				Mixins.addConfiguration("optifabric.compat.fabric-rendering.mixins.json");
+			}
 		}
 
 		if (isPresent("fabric-rendering-data-attachment-v1")) {
@@ -199,7 +203,9 @@ public class OptifabricSetup implements Runnable {
 		}
 
 		if (isPresent("fabric-screen-api-v1")) {
-			if (isPresent("minecraft", ">=1.17-alpha.21.10.a")) {
+			if (isPresent("minecraft", ">=1.19.3")) {
+				Mixins.addConfiguration("optifabric.compat.fabric-screen-api.newerer-mixins.json");
+			} else if (isPresent("minecraft", ">=1.17-alpha.21.10.a")) {
 				if (farPlanePresent.getAsBoolean()) {
 					Mixins.addConfiguration("optifabric.compat.fabric-screen-api.newer-mixins.json");
 				} else {
