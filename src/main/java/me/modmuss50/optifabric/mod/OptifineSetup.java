@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,7 +17,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -31,7 +34,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.RecordComponentNode;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -131,6 +138,8 @@ public class OptifineSetup {
 
 		//Find all the SRG named classes and remove them
 		ZipUtils.transform(optifineModJar, new ZipTransformer() {
+			private final boolean correctRecords = FabricLoader.getInstance().isDevelopmentEnvironment();
+
 			@Override
 			public String mapName(ZipEntry entry) {
 				String out = entry.getName();
@@ -147,6 +156,20 @@ public class OptifineSetup {
 						ClassNode node = ASMUtils.readClass(zip, entry);
 
 						rebuilder.findLambdas(node);
+						if (correctRecords && (node.access & Opcodes.ACC_RECORD) != 0) {
+							assert node.recordComponents != null: "Record with no components: " + node.name;
+							Map<String, Set<String>> descToNames = node.fields.stream().filter(field -> !Modifier.isStatic(field.access)).collect(Collectors.groupingBy(field -> field.desc,
+									Collectors.mapping(field -> FabricLoader.getInstance().getMappingResolver().mapFieldName("official", node.name, field.name, field.desc), Collectors.toSet())));
+
+							for (RecordComponentNode component : node.recordComponents) {
+								Set<String> existingNames = descToNames.get(component.descriptor);
+
+								if (existingNames != null && existingNames.contains(component.name)) {
+									String desc = "()".concat(component.descriptor);
+									node.methods.removeIf(method -> method.name.equals(component.name) && desc.equals(method.desc));
+								}
+							}
+						}
 
 						ClassWriter writer = new ClassWriter(0);
 						node.accept(writer);
@@ -264,7 +287,9 @@ public class OptifineSetup {
 		if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
 			ClassDef option = nameToClass.get("net/minecraft/class_316");
 			ClassDef cyclingOption = nameToClass.get("net/minecraft/class_4064");
-			extraFields.put(new Member(option.getName(from), "CLOUDS", 'L' + cyclingOption.getName(from) + ';'), "CLOUDS_OF");
+			if (option != null && cyclingOption != null) {//Removed in 1.19
+				extraFields.put(new Member(option.getName(from), "CLOUDS", 'L' + cyclingOption.getName(from) + ';'), "CLOUDS_OF");
+			}
 
 			ClassDef worldRenderer = nameToClass.get("net/minecraft/class_761");
 			extraFields.put(new Member(worldRenderer.getName(from), "renderDistance", "I"), "renderDistance_OF");

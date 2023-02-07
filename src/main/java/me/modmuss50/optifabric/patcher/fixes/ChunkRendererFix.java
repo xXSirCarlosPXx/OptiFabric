@@ -44,7 +44,7 @@ public class ChunkRendererFix implements ClassFixer {
 								+ "Lnet/minecraft/class_1920;"
 								+ "Lnet/minecraft/class_4587;"
 								+ "Lnet/minecraft/class_4588;"
-								+ "ZL" + (!nativeRandom ? RemappingUtils.getClassName("class_5819") + ";)V" : "java/util/Random;)Z");
+								+ "ZL" + (!nativeRandom ? "net/minecraft/class_5819;)V" : "java/util/Random;)Z");
 							String name = RemappingUtils.getMethodName("class_776", "method_3355", desc);
 
 							System.out.println(String.format("Replacement `renderBlock` call:  %s.%s", name, desc));
