@@ -182,7 +182,11 @@ public class OptifabricSetup implements Runnable {
 					Mixins.addConfiguration("optifabric.compat.indigo.new-mixins.json");
 				});
 			} else {
-				Mixins.addConfiguration("optifabric.compat.indigo.mixins.json");
+				if (isPresent("fabric-renderer-indigo", ">=0.5.0")) {//First released in 0.51.0+1.18.2
+					Mixins.addConfiguration("optifabric.compat.indigo.mixins.json");
+				} else {
+					Mixins.addConfiguration("optifabric.compat.indigo.old-mixins.json");
+				}
 
 				injector.predictFuture(RemappingUtils.getClassName("class_846$class_849")).ifPresent(node -> {//ChunkBuilder$ChunkData
 					String nonEmptyLayers = RemappingUtils.mapFieldName("class_846$class_849", "field_4450", "Ljava/util/Set;");

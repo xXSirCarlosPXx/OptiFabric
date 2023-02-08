@@ -1,7 +1,7 @@
 {
 	"parent": "optifabric.mixins.json",
 	"package": "me.modmuss50.optifabric.compat.indigo.mixin",
-	"plugin": "me.modmuss50.optifabric.compat.indigo.IndigoOldMixinPlugin",
+	"plugin": "me.modmuss50.optifabric.compat.InterceptingMixinPlugin",
 	"mixins": [
 		"RebuildTaskMixin",
 		"ChunkCacheOFMixin",
