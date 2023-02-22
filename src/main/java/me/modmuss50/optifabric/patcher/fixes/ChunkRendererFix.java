@@ -36,9 +36,13 @@ public class ChunkRendererFix implements ClassFixer {
 							 */
 
 							Type[] args = Type.getArgumentTypes(methodInsnNode.desc);
-							boolean trailingRenderLayer = RemappingUtils.getClassName("class_1921").equals(args[args.length - 1].getInternalName());
-							assert args.length > (trailingRenderLayer ? 4 : 3) && "Z".equals(args[args.length - (trailingRenderLayer ? 4 : 3)].getDescriptor());
-							boolean nativeRandom = "java/util/Random".equals(args[args.length - (trailingRenderLayer ? 3 : 2)].getInternalName());
+							int end = args.length - 1;
+							boolean trailingBoolean = Type.BOOLEAN == args[end].getSort();
+							if (trailingBoolean) end--;
+							boolean trailingRenderLayer = RemappingUtils.getClassName("class_1921").equals(args[end].getInternalName());
+							if (trailingRenderLayer) end--;
+							assert end > 0 && Type.BOOLEAN == args[end - 1].getSort();
+							boolean nativeRandom = "java/util/Random".equals(args[end].getInternalName());
 							String desc = "(Lnet/minecraft/class_2680;"
 								+ "Lnet/minecraft/class_2338;"
 								+ "Lnet/minecraft/class_1920;"
@@ -54,6 +58,10 @@ public class ChunkRendererFix implements ClassFixer {
 							methodInsnNode.desc = RemappingUtils.mapMethodDescriptor(desc);
 
 							it.previous();
+							if (trailingBoolean) {//Remove the additional boolean
+								it.previous();
+								it.remove();
+							}
 							//Remove the model data local load call
 							it.previous();
 							it.remove();

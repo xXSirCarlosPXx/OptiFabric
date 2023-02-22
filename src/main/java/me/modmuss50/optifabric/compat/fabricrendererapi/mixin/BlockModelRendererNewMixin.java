@@ -48,4 +48,14 @@ abstract class BlockModelRendererNewMixin {
 						Throwable t, CrashReport crash, CrashReportSection modelInfo) {
 		addInfo(world, model, state, pos, matrix, vertexConsumer, cull, random, seed, overlay, modelData, call, useAO, modelOffset, t, crash, modelInfo);
 	}
+
+	@Group(min = 1, max = 1)
+	@Inject(method = "tesselateBlock{1, 2}", remap = false, locals = LocalCapture.CAPTURE_FAILSOFT,
+			at = @At(value = "INVOKE_ASSIGN", remap = true,
+					target = "Lnet/minecraft/util/crash/CrashReportSection;add(Ljava/lang/String;Ljava/lang/Object;)Lnet/minecraft/util/crash/CrashReportSection;"))
+	private void addInfo(BlockRenderView world, BakedModel model, BlockState state, BlockPos pos, MatrixStack matrix, VertexConsumer vertexConsumer, boolean cull,
+						class_5819 random, long seed, int overlay, @Coerce Object modelData, RenderLayer layer, boolean queryModelSpecificData, CallbackInfo call,
+						boolean useAO, Vec3d modelOffset, Throwable t, CrashReport crash, CrashReportSection modelInfo) {
+		addInfo(world, model, state, pos, matrix, vertexConsumer, cull, random, seed, overlay, modelData, call, useAO, modelOffset, t, crash, modelInfo);
+	}
 }

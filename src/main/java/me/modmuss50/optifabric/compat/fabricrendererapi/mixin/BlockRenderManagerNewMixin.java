@@ -43,4 +43,15 @@ abstract class BlockRenderManagerNewMixin {
 						@Coerce Object modelData, RenderLayer layer, CallbackInfo call, Throwable t, CrashReport crash, CrashReportSection blockInfo) {
 		addInfo(state, pos, world, matrix, vertexConsumer, cull, random, modelData, call, t, crash, blockInfo);
 	}
+
+	@Group(min = 1, max = 1)
+	@Inject(method = "renderBatched{1, 2}", remap = false, locals = LocalCapture.CAPTURE_FAILSOFT,
+			at = @At(value = "INVOKE", shift = Shift.AFTER, remap = true,
+					target = "Lnet/minecraft/util/crash/CrashReportSection;addBlockInfo(Lnet/minecraft/util/crash/CrashReportSection;"
+							+ "Lnet/minecraft/world/HeightLimitView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V")
+			)
+	private void addInfo(BlockState state, BlockPos pos, BlockRenderView world, MatrixStack matrix, VertexConsumer vertexConsumer, boolean cull, class_5819 random,
+						@Coerce Object modelData, RenderLayer layer, boolean queryModelSpecificData, CallbackInfo call, Throwable t, CrashReport crash, CrashReportSection blockInfo) {
+		addInfo(state, pos, world, matrix, vertexConsumer, cull, random, modelData, call, t, crash, blockInfo);
+	}
 }
