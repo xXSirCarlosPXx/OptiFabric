@@ -52,13 +52,16 @@ public class OptifineFixer {
 			//net/minecraft/client/gui/hud/InGameHud
 			registerFix("class_329", new InGameHudFix());
 		}
+
+		//net/minecraft/block/entity/BlockEntity
+		skipClass("class_2586");
 	}
 
 	private void registerFix(String className, ClassFixer classFixer) {
 		classFixes.computeIfAbsent(RemappingUtils.getClassName(className), s -> new ArrayList<>()).add(classFixer);
 	}
 
-	@SuppressWarnings("unused") //Might be useful in future
+	@SuppressWarnings("SameParameterValue") //Might be useful in future
 	private void skipClass(String className) {
 		skippedClass.add(RemappingUtils.getClassName(className));
 	}
