@@ -253,7 +253,7 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.trumpet-skeleton.mixins.json");
 		}
 
-		if (isPresent("multiconnect", ">1.3.14")) {
+		if (isPresent("multiconnect", ">1.3.14 <1.6-beta.1")) {
 			Mixins.addConfiguration("optifabric.compat.multiconnect.mixins.json");
 		}
 
