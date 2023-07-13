@@ -67,7 +67,7 @@ public class OptifabricSetup implements Runnable {
 				return injector.predictFuture(RemappingUtils.getClassName("class_702")).filter(node -> {//ParticleManager
 					//(MatrixStack, VertexConsumerProvider$Immediate, LightmapTextureManager, Camera, Frustum)
 					String desc = RemappingUtils.mapMethodDescriptor("(Lnet/minecraft/class_4587;Lnet/minecraft/class_4597$class_4598;"
-																	+ "Lnet/minecraft/class_765;Lnet/minecraft/class_4184;FLnet/minecraft/class_4604;)V");
+							+ "Lnet/minecraft/class_765;Lnet/minecraft/class_4184;FLnet/minecraft/class_4604;)V");
 
 					for (MethodNode method : node.methods) {
 						if (("renderParticles".equals(method.name) || "render".equals(method.name)) && desc.equals(method.desc)) {
@@ -404,7 +404,9 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.images.mixins.json");
 		}
 
-		if (isPresent("architectury", ">=7.0.52")) {
+		if (isPresent("architectury", ">=9.0.6")) {
+			Mixins.addConfiguration("optifabric.compat.architectury-AB.new4er-mixins.json");
+		} else if (isPresent("architectury", ">=7.0.52")) {
 			Mixins.addConfiguration("optifabric.compat.architectury-AB.newererer-mixins.json");
 		} else if (isPresent("architectury", ">=3.7")) {
 			Mixins.addConfiguration("optifabric.compat.architectury-AB.newerer-mixins.json");
