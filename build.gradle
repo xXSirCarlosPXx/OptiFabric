@@ -74,6 +74,7 @@ compileJava {
 		classes += ['net/minecraft/class_5944': 'net/minecraft/class_5944']
 		method 'net/minecraft/class_5944', '(Lnet/minecraft/class_5912;Lnet/minecraft/util/Identifier;Lnet/minecraft/client/render/VertexFormat;)V', '<init>', '<init>'
 		method 'net/minecraft/client/gui/screen/Screen', '(Lnet/minecraft/class_332;IIF)V', 'renderWithTooltip', 'method_47413'
+		classes += ['net/minecraft/client/render/model/Baker': 'net/minecraft/class_7775']
 	}
 }
 
