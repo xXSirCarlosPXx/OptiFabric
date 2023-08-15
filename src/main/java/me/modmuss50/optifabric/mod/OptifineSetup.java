@@ -273,8 +273,10 @@ public class OptifineSetup {
 		extraFields.put(new Member(rebuildTask.getName(from), "this$1", 'L' + builtChunk.getName(from) + ';'), "field_20839");
 
 		ClassDef bakerImpl = nameToClass.get("net/minecraft/class_1088$class_7778");
-		ClassDef modelLoader = nameToClass.get("net/minecraft/class_1088");
-		extraFields.put(new Member(bakerImpl.getName(from), "this$0", 'L' + modelLoader.getName(from) + ';'), "field_40571");
+		if (bakerImpl != null) {//Only present in 1.19.3+
+			ClassDef modelLoader = nameToClass.get("net/minecraft/class_1088");
+			extraFields.put(new Member(bakerImpl.getName(from), "this$0", 'L' + modelLoader.getName(from) + ';'), "field_40571");
+		}
 
 		ClassDef particleManager = nameToClass.get("net/minecraft/class_702");
 		particleManager.getFields().stream().filter(field -> "field_3835".equals(field.getName("intermediary"))).forEach(field -> {
