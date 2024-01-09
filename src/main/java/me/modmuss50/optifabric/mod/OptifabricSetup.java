@@ -234,6 +234,10 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.fabric-lifecycle-events.new-mixins.json");
 		}
 
+		if (isPresent("fabric-model-loading-api-v1")) {
+			Mixins.addConfiguration("optifabric.compat.fabric-model-loading-api.mixins.json");
+		}
+
 		Mixins.addConfiguration("optifabric.optifine.mixins.json");
 		if (OptifabricSetup.isPresent("minecraft", "<=1.19.2")) {
 			Mixins.addConfiguration("optifabric.optifine.old-mixins.json");

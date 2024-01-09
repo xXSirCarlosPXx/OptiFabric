@@ -277,6 +277,12 @@ public class OptifineSetup {
 				mapper.add(ContextualMapping.forField((out, context) -> {//Only present in 1.17.x (20w45a+)
 					out.acceptField(new Member(context.unmapClass(clientEntityHandler), "this$0", 'L' + context.unmapClass(clientWorld) + ';'), "field_27735");
 				}).usingClasses(clientEntityHandler, clientWorld));
+
+                String bakerImpl = "net/minecraft/class_1088$class_7778";
+		        String modelLoader = "net/minecraft/class_1088";
+                mapper.add(ContextualMapping.forField((out, context) -> {//Only present in 1.19.3
+					out.acceptField(new Member(context.unmapClass(bakerImpl), "this$0", 'L' + context.unmapClass(modelLoader) + ';'), "field_40571");
+				}).usingClasses(bakerImpl, modelLoader));
 			}
 
 			private void devExtraMappings(ContextualMappingProvider mapper) {
