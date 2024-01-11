@@ -12,13 +12,14 @@ import org.spongepowered.asm.mixin.transformer.ClassInfo;
 public class ModelLoadingMixinPlugin extends InterceptingMixinPlugin {
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		// not doing this will cause Mixin to have a stroke while trying to find where to put the fabric injectors
-		ClassInfo info = ClassInfo.forName(targetClassName);
-		MixinUtils.completeClassInfo(info, targetClass.methods);
-		String bakeDesc = "(Lnet/minecraft/class_2960;Lnet/minecraft/class_3665;)Lnet/minecraft/class_1087;";//(Identifier, ModelBakeSettings)BakedModel
-		String bake = RemappingUtils.getMethodName("class_7775", "method_45873", bakeDesc);//BakerImpl, bake
-		bakeDesc = RemappingUtils.mapMethodDescriptor(bakeDesc);
 		if ("ModelLoaderBakerImplMixin".equals(mixinInfo.getName())) {
+			// not doing this will cause Mixin to have a stroke while trying to find where to put the fabric injectors
+			ClassInfo info = ClassInfo.forName(targetClassName);
+			MixinUtils.completeClassInfo(info, targetClass.methods);
+			String bakeDesc = "(Lnet/minecraft/class_2960;Lnet/minecraft/class_3665;)Lnet/minecraft/class_1087;";//(Identifier, ModelBakeSettings)BakedModel
+			String bake = RemappingUtils.getMethodName("class_7775", "method_45873", bakeDesc);//BakerImpl, bake
+			bakeDesc = RemappingUtils.mapMethodDescriptor(bakeDesc);
+
 			for (MethodNode method : targetClass.methods) {
 				if (bake.equals(method.name) && bakeDesc.equals(method.desc)) {
 					//This is the @ModifyVariable
@@ -48,7 +49,6 @@ public class ModelLoadingMixinPlugin extends InterceptingMixinPlugin {
 					Member redirectMixinTarget2 = RemappingUtils.mapMethod("class_793", "method_3446", "(Lnet/minecraft/class_7775;Lnet/minecraft/class_793;Ljava/util/function/Function;Lnet/minecraft/class_3665;Lnet/minecraft/class_2960;Z)Lnet/minecraft/class_1087;");
 					LabelNode skipLast = new LabelNode();
 					InsnList extraLast = new InsnList();
-					// this works because funny (and because no local variable is involved)
 					extraLast.add(new JumpInsnNode(Opcodes.GOTO, skipLast));
 					extraLast.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, redirectMixinTarget1.owner, redirectMixinTarget1.name, redirectMixinTarget1.desc));
 					extraLast.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, redirectMixinTarget2.owner, redirectMixinTarget2.name, redirectMixinTarget2.desc));
@@ -61,30 +61,4 @@ public class ModelLoadingMixinPlugin extends InterceptingMixinPlugin {
 
 		super.preApply(targetClassName, targetClass, mixinClassName, mixinInfo);
 	}
-
-	/*@Override
-	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-		String bakeDesc = "(Lnet/minecraft/class_2960;Lnet/minecraft/class_3665;)Lnet/minecraft/class_1087;";
-		String bake = RemappingUtils.getMethodName("class_7775", "method_45873", bakeDesc);
-		bakeDesc = RemappingUtils.mapMethodDescriptor(bakeDesc);
-
-		if ("ModelLoaderBakerImplMixin".equals(mixinInfo.getName())) {
-			out: for (MethodNode method : targetClass.methods) {
-				if (bake.equals(method.name) && bakeDesc.equals(method.desc)) {
-					LocalVariableNode fakeUnbakedModel = method.localVariables.get(3);
-					method.localVariables.remove(fakeUnbakedModel);
-					method.maxLocals -= 1;
-					// remove trash
-					for (AbstractInsnNode insn : method.instructions) {
-						method.instructions.remove(insn);
-						System.out.println(insn);
-						if (fakeUnbakedModel.end.equals(insn)) {
-							break out;
-						}
-					}
-				}
-			}
-		}
-		super.postApply(targetClassName, targetClass, mixinClassName, mixinInfo);
-	}*/
 }
