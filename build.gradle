@@ -209,8 +209,8 @@ task libraryJar(type: Jar, dependsOn: proguardJar) {
 			"name": "OptiFabric Libraries",
 			"description": "Shadowed libraries included within OptiFabric",
 			"authors": [
-				"Chocohead"
-				"Tiny-Remapper contributors",
+				"Chocohead",
+				"Tiny-Remapper contributors"
 			],
 			"contact": {
 				"sources": "https://github.com/Chocohead/OptiFabric",
