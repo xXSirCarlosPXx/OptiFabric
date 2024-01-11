@@ -241,6 +241,8 @@ public class OptifabricSetup implements Runnable {
 		Mixins.addConfiguration("optifabric.optifine.mixins.json");
 		if (OptifabricSetup.isPresent("minecraft", "<=1.19.2")) {
 			Mixins.addConfiguration("optifabric.optifine.old-mixins.json");
+		} else {
+			Mixins.addConfiguration("optifabric.optifine.new-mixins.json");
 		}
 
 		if (isPresent("fabricloader", ">=0.13.0") && (isPresent("cloth-client-events-v0", ">=3.1.58") || isPresent("cloth-client-events-v0", ">=2.1.60 <3.0") || isPresent("cloth-client-events-v0", ">=1.6.59 <2.0"))) {
