@@ -138,7 +138,13 @@ public class OptifabricSetup implements Runnable {
 			Mixins.addConfiguration("optifabric.compat.fabric-rendering.extra-mixins.json");
 		}
 
-		if (isPresent("fabric-rendering-data-attachment-v1")) {
+		if (isPresent("fabric-block-view-api-v2")) {
+			Mixins.addConfiguration("optifabric.compat.fabric-block-view-api.mixins.json");
+
+			if (isPresent("fabric-rendering-data-attachment-v1")) {
+				Mixins.addConfiguration("optifabric.compat.fabric-rendering-data.mixins.json");
+			}
+		} else if (isPresent("fabric-rendering-data-attachment-v1")) {
 			Mixins.addConfiguration("optifabric.compat.fabric-rendering-data.mixins.json");
 
 			if (isPresent("fabric-rendering-data-attachment-v1", ">0.3.0")) {
@@ -210,7 +216,11 @@ public class OptifabricSetup implements Runnable {
 		}
 
 		if (isPresent("fabric-screen-api-v1")) {
-			if (isPresent("minecraft", ">=1.20")) {
+			if (isPresent("fabric-screen-api-v1", ">=2.0.16")) {
+				//0.92.1 moved to use Mixin Extra so no longer an issue
+			} else if (isPresent("minecraft", ">=1.20.2")) {
+				Mixins.addConfiguration("optifabric.compat.fabric-screen-api.new5er-mixins.json");
+			} else if (isPresent("minecraft", ">=1.20")) {
 				Mixins.addConfiguration("optifabric.compat.fabric-screen-api.new4er-mixins.json");
 			} else if (isPresent("fabric-api", ">=0.81.0")) {
 				Mixins.addConfiguration("optifabric.compat.fabric-screen-api.new3er-mixins.json");
