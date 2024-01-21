@@ -8,10 +8,10 @@
 
 ## Supported Versions
 
-| Target Release | Version |     |   |   |
-|----------------|---------|---- |---|---|
-| 1.20.5         | 23w51(a\|b), 24w03(a\|b)     | ✅ |  |  |
-| <1.20.4        | All     | ❌  |  |  |
+| Target Release | Version |   Supported  |
+|----------------|---------| ------------ |
+| 1.20.5         | 23w51(a\|b), 24w03(a\|b) | ✅ |
+| <1.20.4        | All     | ❌ |                |
 
 ## Installing
 
