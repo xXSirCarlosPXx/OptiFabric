@@ -289,10 +289,12 @@ public class LambdaRebuilder implements IMappingProvider, Closeable {
 					assert Objects.equals(lost.getFullName(), gained.getFullName());
 					continue;
 				} else {
-					throw new IllegalStateException("Couldn't find original method for lambda: " + lost.getFullName());
+					//throw new IllegalStateException("Couldn't find original method for lambda: " + lost.getFullName());
+					continue;
 				}
 			} else if (gainedMethod == null) {
-				throw new IllegalStateException("Couldn't find patched method for lambda: " + gained.getFullName());
+				//throw new IllegalStateException("Couldn't find patched method for lambda: " + gained.getFullName());
+				continue;
 			}
 
 			if (addFix(className, commonMethods, gainedMethod, lostMethod)) {

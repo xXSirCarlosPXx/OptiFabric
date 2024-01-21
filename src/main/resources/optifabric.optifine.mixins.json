@@ -6,7 +6,6 @@
 		"MixinOptifineConfig",
 		"CustomColoursMixin",
 		"ShadersMixin",
-		"VideoOptionsScreenMixin",
 		"Config",
 		"SMCLog",
 		"ParticleManagerMixin"
