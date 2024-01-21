@@ -1,10 +1,17 @@
 # OptiFabric
 
-![](https://ss.modmuss50.me/javaw_2019-05-22_20-33-34.jpg)
+**This only works with OptiKai! OptiKai is a fork of OptiFine that runs on snapshots developed by me (KaiAF) with permission from sp614x!**
 
-__Note:__ This project is not related or supported by either Fabric or Optifine.
+**Note:** This project is not related or supported by either Fabric or OptiFine.
 
-__Note:__ This project does not contain Optifine, you must download it separately!
+**Note:** This project does not contain OptiFine, you must download it separately!
+
+## Supported Versions
+
+| Target Release | Version |     |   |   |
+|----------------|---------|---- |---|---|
+| 1.20.5         | 23w51(a\|b), 24w03(a\|b)     | ✅ |  |  |
+| <1.20.4        | All     | ❌  |  |  |
 
 ## Installing
 
@@ -14,17 +21,15 @@ Fabric Loader should be the latest version from the [Fabric Website](https://fab
 
 If you need more help you can read a more detailed guide [here](https://github.com/modmuss50/OptiFabric/wiki/Install-Tutorial)
 
-
 ## Links
 
-### [OptiFabric Downloads](https://minecraft.curseforge.com/projects/optifabric)
+- [OptiFabric Downloads](https://minecraft.curseforge.com/projects/optifabric)
 
-### [Optifine Download](https://optifine.net/downloads)
+- [OptiKai Download](https://livzmc.net/optikai)
 
 ## Issues
 
-If you happen to find an issue and you believe it is to do with OptiFabric and not Optifine or a mod please open an issue [here](https://github.com/Chocohead/OptiFabric/issues) 
-
+If you happen to find an issue and you believe it is to do with OptiFabric and not Optifine or a mod please open an issue [here](https://github.com/Chocohead/OptiFabric/issues)
 
 ## For Mod Devs
 
@@ -46,14 +51,6 @@ Put the standard Optifine jar in /run/mods
 Class export can be enabled using the following VM Option, this will extract the overwritten classes to the .optifine folder, useful for debugging.
 
 `-Doptifabric.extract=true`
-
-## Screenshots
-
-Feel free to open a PR with more screenshots.
-
-![](https://ss.modmuss50.me/javaw_2019-05-22_20-36-25.jpg)
-
-![](https://ss.modmuss50.me/javaw_2019-05-22_19-49-41.jpg)
 
 ## How it works
 
