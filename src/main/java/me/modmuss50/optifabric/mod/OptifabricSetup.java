@@ -183,9 +183,14 @@ public class OptifabricSetup implements Runnable {
 
 					for (MethodNode method : node.methods) {
 						if ("renderBatched".equals(method.name) && method.desc.endsWith(desc)) {
-							Mixins.addConfiguration("optifabric.compat.indigo.newer-mixins.json");
-							return;
-						}
+							if (isPresent("minecraft", ">1.20.4")) {
+								Mixins.addConfiguration("optifabric.compat.indigo.205-mixins.json");
+                            } else {
+								Mixins.addConfiguration("optifabric.compat.indigo.newer-mixins.json");
+                            }
+
+                            return;
+                        }
 					}
 
 					Mixins.addConfiguration("optifabric.compat.indigo.new-mixins.json");
