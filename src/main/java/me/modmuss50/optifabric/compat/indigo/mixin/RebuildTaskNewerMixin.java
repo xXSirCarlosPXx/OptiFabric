@@ -37,7 +37,7 @@ abstract class RebuildTaskNewerMixin {
 			at = @At(value = "INVOKE", target = "Lnet/optifine/BlockPosM;getAllInBoxMutable(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Ljava/lang/Iterable;", shift = Shift.AFTER),
 			locals = LocalCapture.CAPTURE_FAILHARD)
 	private void hookChunkBuildX(float cameraX, float cameraY, float cameraZ, BlockBufferBuilderStorage buffer, CallbackInfoReturnable<?> call, class_7435 renderData,
-								int one, BlockPos origin, BlockPos oppositeOrigin, ChunkOcclusionDataBuilder occlusionBuilder, MatrixStack matrices, @Coerce ChunkCacheOFAccess chunkCache,
+								int one, BlockPos origin, BlockPos oppositeOrigin, ChunkOcclusionDataBuilder occlusionBuilder, @Coerce ChunkCacheOFAccess chunkCache, MatrixStack matrices,
 								@Coerce Object singleLayer, boolean shaders, boolean shadersMidBlock, Set<RenderLayer> initializedLayers, class_5819 random, BlockRenderManager renderManager) {
 		hookChunkBuild(cameraX, cameraY, cameraZ, buffer, call, renderData, one, origin, oppositeOrigin, occlusionBuilder, chunkCache.getChunkCache(), matrices, initializedLayers, random, renderManager);
 	}
@@ -49,7 +49,7 @@ abstract class RebuildTaskNewerMixin {
 
 	@PlacatingSurrogate
 	private void hookChunkBuild(float cameraX, float cameraY, float cameraZ, BlockBufferBuilderStorage buffer, CallbackInfoReturnable<?> call, class_7435 renderData,
-								int one, BlockPos origin, BlockPos oppositeOrigin, ChunkOcclusionDataBuilder occlusionBuilder, MatrixStack matrices,
-								@LoudCoerce(value="net/optifine/override/ChunkCacheOF", remap=false) Object chunkCache, @LoudCoerce(value="net/optifine/util/SingleIterable", remap=false) Object singleLayer, boolean shaders, boolean shadersMidBlock) {
+								int one, BlockPos origin, BlockPos oppositeOrigin, ChunkOcclusionDataBuilder occlusionBuilder, @LoudCoerce(value="net/optifine/override/ChunkCacheOF", remap=false) Object chunkCache,
+								MatrixStack matrices, @LoudCoerce(value="net/optifine/util/SingleIterable", remap=false) Object singleLayer, boolean shaders, boolean shadersMidBlock) {
 	}
 }
