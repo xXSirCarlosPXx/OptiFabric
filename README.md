@@ -6,13 +6,6 @@
 
 **Note:** This project does not contain OptiFine, you must download it separately!
 
-## Supported Versions
-
-| Target Release | Version |   Supported  |
-|----------------|---------| ------------ |
-| 1.20.5         | 23w51(a\|b), 24w03(a\|b) | ✅ |
-| <1.20.4        | All     | ❌ |                |
-
 ## Installing
 
 After installing fabric for 1.16.3, you will need to place the OptiFabric mod jar as well as the optifine installer in the mods folder.
