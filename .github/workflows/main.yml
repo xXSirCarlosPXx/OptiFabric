@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 1.8
+          distribution: temurin
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
@@ -29,5 +30,7 @@ jobs:
           path: build/libs/optifabric-*.*.jar
           if-no-files-found: error
       - uses: actions/download-artifact@v4
+        with:
+          path: build/libs
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -R build/libs
